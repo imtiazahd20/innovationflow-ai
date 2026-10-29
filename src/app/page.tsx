@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { APP_NAME, APP_TAGLINE, MODULES } from "@/lib/config";
 
 export default function Home() {
@@ -11,6 +12,14 @@ export default function Home() {
           {APP_NAME}
         </h1>
         <p className="max-w-2xl text-lg leading-8 text-zinc-600">{APP_TAGLINE}</p>
+        <div>
+          <Link
+            href="/login"
+            className="inline-block rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+          >
+            Sign in or create an account
+          </Link>
+        </div>
       </header>
 
       <section aria-labelledby="modules-heading" className="flex flex-col gap-4">
