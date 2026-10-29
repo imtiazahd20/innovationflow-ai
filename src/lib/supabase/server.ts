@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { getSupabaseEnv } from "./env";
 
 // Creates a Supabase connection for server code (pages, server actions, route handlers).
@@ -13,6 +14,9 @@ export async function createClient() {
   const env = getSupabaseEnv();
   if (!env) return null;
 
+  // Wait for a real request before building the client. The Supabase client reads the clock
+  // (Date.now) while loading the session, which Next.js forbids during prerendering.
+  await connection();
   const cookieStore = await cookies();
 
   return createServerClient(env.url, env.key, {
