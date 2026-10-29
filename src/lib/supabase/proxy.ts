@@ -33,9 +33,12 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // getClaims() checks the login token's signature, so a forged cookie is rejected.
-  const { data } = await supabase.auth.getClaims();
-  const isLoggedIn = Boolean(data?.claims);
+  // getUser() asks Supabase whether this login is still valid. The dashboard page asks the
+  // same question, so the two can never disagree. (Using getClaims() here let a revoked
+  // login pass the proxy but fail the dashboard, which bounced people between /login and
+  // /dashboard forever and froze the browser tab.)
+  const { data } = await supabase.auth.getUser();
+  const isLoggedIn = Boolean(data?.user);
 
   const target = redirectTargetFor(request.nextUrl.pathname, isLoggedIn);
   if (target) {
