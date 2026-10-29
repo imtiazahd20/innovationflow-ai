@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { APP_NAME, APP_TAGLINE, MODULES } from "@/lib/config";
+import { createClient } from "@/lib/supabase/server";
 
 export default function Home() {
   return (
@@ -13,12 +15,10 @@ export default function Home() {
         </h1>
         <p className="max-w-2xl text-lg leading-8 text-zinc-600">{APP_TAGLINE}</p>
         <div>
-          <Link
-            href="/login"
-            className="inline-block rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-          >
-            Sign in or create an account
-          </Link>
+          {/* The page itself is static. Only this button waits to learn who is signed in. */}
+          <Suspense fallback={<StartLink href="/login" label="Sign in or create an account" />}>
+            <AccountLink />
+          </Suspense>
         </div>
       </header>
 
@@ -55,5 +55,26 @@ export default function Home() {
         </ol>
       </section>
     </main>
+  );
+}
+
+async function AccountLink() {
+  const supabase = await createClient();
+  const { data } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+  return data.user ? (
+    <StartLink href="/dashboard" label="Go to your dashboard" />
+  ) : (
+    <StartLink href="/login" label="Sign in or create an account" />
+  );
+}
+
+function StartLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="inline-block rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+    >
+      {label}
+    </Link>
   );
 }
