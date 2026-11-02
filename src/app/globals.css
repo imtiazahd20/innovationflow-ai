@@ -50,3 +50,35 @@ body {
     transform: rotate(0deg) scale(1.08) !important;
   }
 }
+
+/* Idea pop-up: the box grows in and the dimmed background fades in.
+   Turned off for people who prefer less motion. */
+.idea-dialog::backdrop {
+  background: rgb(13 13 13 / 0.55);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .idea-dialog[open] {
+    animation: idea-pop 0.22s ease-out;
+  }
+  .idea-dialog[open]::backdrop {
+    animation: idea-fade 0.22s ease-out;
+  }
+}
+@keyframes idea-pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes idea-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
