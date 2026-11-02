@@ -50,13 +50,15 @@ export function ScoreForm({
         >
           {pending ? "Saving…" : "Save scores"}
         </button>
+        <p className="min-w-0 flex-1 basis-48 text-xs text-zinc-700">
+          0 = weakest, 10 = strongest. An idea is ranked once all criteria are scored.
+        </p>
         {state.error ? (
           <p role="alert" className="text-sm font-medium text-flow-red">{state.error}</p>
         ) : state.done ? (
           <p role="status" className="text-sm font-medium text-flow-ink">Scores saved.</p>
         ) : null}
       </div>
-      <p className="text-xs text-zinc-700">0 = weakest, 10 = strongest. An idea is ranked once all criteria are scored.</p>
     </form>
   );
 }
