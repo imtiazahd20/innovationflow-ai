@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { getSupabaseEnv } from "@/lib/supabase/env";
@@ -16,6 +16,11 @@ import {
   type PostResult,
   type UploadedFile,
 } from "@/lib/discussion/schema";
+
+// How often (in milliseconds) an open thread checks for new comments.
+const POLL_MS = 8000;
+// Shared by every thread on the page, so several threads never refresh the page at the same moment.
+let lastPoll = 0;
 
 export const ROLE_LABEL = { submitter: "Participant", judge: "Judge", owner: "Organiser" } as const;
 const ROLE_COLOR = { submitter: "bg-white", judge: "bg-flow-pink", owner: "bg-flow-yellow" } as const;
@@ -42,6 +47,23 @@ export function CommentThread({ idea, viewer, uploadFolder, postAction, deleteAc
   const [busy, startTransition] = useTransition();
   const [, startRefresh] = useTransition();
   const env = getSupabaseEnv();
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // "Live" comments: while this thread is on screen and the browser tab is in front, ask the
+  // server for fresh data every few seconds. router.refresh() re-reads the page's data but keeps
+  // what you are typing and which idea is open.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const el = sectionRef.current;
+      const onScreen = el !== null && el.offsetParent !== null; // false inside a closed dropdown
+      if (document.hidden || !onScreen || busy) return;
+      if (Date.now() - lastPoll < POLL_MS / 2) return;
+      lastPoll = Date.now();
+      startRefresh(() => router.refresh());
+    }, POLL_MS);
+    return () => clearInterval(timer);
+  }, [busy, router]);
+
   const bodyId = uid ? `comment-body-${uid}` : "comment-body";
   const filesId = uid ? `comment-files-${uid}` : "comment-files";
 
@@ -91,17 +113,18 @@ export function CommentThread({ idea, viewer, uploadFolder, postAction, deleteAc
   }
 
   return (
-      <section aria-labelledby={`comments-heading-${idea.id}`} className="flex flex-col gap-3 border-t-4 border-flow-ink pt-4">
+      <section ref={sectionRef} aria-labelledby={`comments-heading-${idea.id}`} className="flex flex-col gap-3 border-t-4 border-flow-ink pt-4">
         <div className="flex items-center justify-between gap-3">
           <h4 id={`comments-heading-${idea.id}`} className="font-display text-base font-black uppercase">
-            Comments ({idea.comments.length})
+            Comments ({idea.comments.length}){" "}
+            <span className="ml-1 text-[10px] font-bold normal-case tracking-normal text-zinc-600">updates automatically</span>
           </h4>
           <button
             type="button"
             onClick={() => startRefresh(() => router.refresh())}
             className="cursor-pointer rounded-lg border-2 border-flow-ink px-3 py-1 text-xs font-black uppercase hover:bg-flow-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
           >
-            Refresh
+            Refresh now
           </button>
         </div>
         {idea.comments.length === 0 ? (
