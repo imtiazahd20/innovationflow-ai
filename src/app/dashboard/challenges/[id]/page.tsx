@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { Dropdown } from "@/components/dropdown";
 import { APP_NAME } from "@/lib/config";
 import { isChallengeId } from "@/lib/challenges/ids";
 import type { Challenge } from "@/lib/challenges/types";
@@ -113,78 +114,82 @@ async function ChallengeDetail({ params, searchParams }: Props) {
         <h1 className="font-display text-3xl font-black uppercase tracking-tight text-flow-ink">{challenge.title}</h1>
       </header>
 
-      <dl className="flex flex-col gap-6">
-        <Detail label="Business problem" value={challenge.business_problem} />
-        <Detail label="Objectives" value={challenge.objectives} />
-        <Detail label="Target participants" value={challenge.target_participants} />
-      </dl>
+      {/* The details start closed so the page stays short; click a title to read or edit it. */}
+      <div className="flex flex-col gap-4">
+        <Dropdown title="Business Problem and Objectives">
+          <dl className="flex flex-col gap-6">
+            <Detail label="Business problem" value={challenge.business_problem} />
+            <Detail label="Objectives" value={challenge.objectives} />
+            <Detail label="Target participants" value={challenge.target_participants} />
+          </dl>
+        </Dropdown>
 
-      <section aria-labelledby="plan-heading" className="flex flex-col gap-6 border-t-4 border-flow-ink pt-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="plan-heading" className="font-display text-xl font-black uppercase text-flow-ink">
-            Brief, criteria and timeline
-          </h2>
-          <Link
-            href={`/dashboard/challenges/${challenge.id}/plan`}
-            className="rounded-lg border-2 border-flow-ink bg-white px-4 py-2 text-sm font-semibold text-flow-ink transition-colors hover:bg-flow-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
-          >
-            {brief || criteria.length > 0 || phases.length > 0 ? "Edit plan" : "Create plan"}
-          </Link>
-        </div>
+        <Dropdown title="Brief, Criteria and Timeline">
+          <div className="flex flex-col gap-6">
+            <div>
+              <Link
+                href={`/dashboard/challenges/${challenge.id}/plan`}
+                className="inline-block rounded-lg border-2 border-flow-ink bg-white px-4 py-2 text-sm font-semibold text-flow-ink transition-colors hover:bg-flow-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
+              >
+                {brief || criteria.length > 0 || phases.length > 0 ? "Edit plan" : "Create plan"}
+              </Link>
+            </div>
 
-        {brief || criteria.length > 0 || phases.length > 0 ? (
-          <>
-            <div className="flex flex-col gap-1">
-              <h3 className="text-sm font-medium text-zinc-700">Brief</h3>
-              {brief ? (
-                <p className="whitespace-pre-line text-flow-ink">{brief}</p>
-              ) : (
-                <p className="text-sm text-zinc-700">Not written yet.</p>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <h3 className="text-sm font-medium text-zinc-700">Judging criteria</h3>
-              {criteria.length === 0 ? (
-                <p className="text-sm text-zinc-700">None yet.</p>
-              ) : (
-                <ul className="flex flex-col gap-2">
-                  {criteria.map((c) => (
-                    <li key={c.id} className="rounded-lg border-2 border-flow-ink bg-white p-3">
-                      <p className="font-medium text-flow-ink">
-                        {c.name} <span className="text-zinc-700">· {c.weight}%</span>
-                      </p>
-                      {c.description ? <p className="mt-1 text-sm text-zinc-800">{c.description}</p> : null}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <h3 className="text-sm font-medium text-zinc-700">Timeline</h3>
-              {phases.length === 0 ? (
-                <p className="text-sm text-zinc-700">None yet.</p>
-              ) : (
-                <ol className="flex flex-col gap-2">
-                  {phases.map((p) => (
-                    <li key={p.id} className="rounded-lg border-2 border-flow-ink bg-white p-3">
-                      <p className="font-medium text-flow-ink">{p.name}</p>
-                      <p className="text-sm text-zinc-800">
-                        {formatDate(p.starts_on)} – {formatDate(p.ends_on)}
-                      </p>
-                      {p.description ? <p className="mt-1 text-sm text-zinc-800">{p.description}</p> : null}
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
-          </>
-        ) : (
-          <p className="text-sm text-zinc-800">
-            No plan yet. Create one to write the brief, set how entries are judged and lay out the timeline. You can
-            start from an automatic draft.
-          </p>
-        )}
-      </section>
+            {brief || criteria.length > 0 || phases.length > 0 ? (
+              <>
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-sm font-medium text-zinc-700">Brief</h3>
+                  {brief ? (
+                    <p className="whitespace-pre-line text-flow-ink">{brief}</p>
+                  ) : (
+                    <p className="text-sm text-zinc-700">Not written yet.</p>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-sm font-medium text-zinc-700">Judging criteria</h3>
+                  {criteria.length === 0 ? (
+                    <p className="text-sm text-zinc-700">None yet.</p>
+                  ) : (
+                    <ul className="flex flex-col gap-2">
+                      {criteria.map((c) => (
+                        <li key={c.id} className="rounded-lg border-2 border-flow-ink bg-white p-3">
+                          <p className="font-medium text-flow-ink">
+                            {c.name} <span className="text-zinc-700">· {c.weight}%</span>
+                          </p>
+                          {c.description ? <p className="mt-1 text-sm text-zinc-800">{c.description}</p> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-sm font-medium text-zinc-700">Timeline</h3>
+                  {phases.length === 0 ? (
+                    <p className="text-sm text-zinc-700">None yet.</p>
+                  ) : (
+                    <ol className="flex flex-col gap-2">
+                      {phases.map((p) => (
+                        <li key={p.id} className="rounded-lg border-2 border-flow-ink bg-white p-3">
+                          <p className="font-medium text-flow-ink">{p.name}</p>
+                          <p className="text-sm text-zinc-800">
+                            {formatDate(p.starts_on)} – {formatDate(p.ends_on)}
+                          </p>
+                          {p.description ? <p className="mt-1 text-sm text-zinc-800">{p.description}</p> : null}
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-zinc-800">
+                No plan yet. Create one to write the brief, set how entries are judged and lay out the timeline. You
+                can start from an automatic draft.
+              </p>
+            )}
+          </div>
+        </Dropdown>
+      </div>
 
       <section aria-labelledby="ideas-heading" className="flex flex-col gap-4 border-t-4 border-flow-ink pt-6">
         <h2 id="ideas-heading" className="font-display text-xl font-black uppercase text-flow-ink">
