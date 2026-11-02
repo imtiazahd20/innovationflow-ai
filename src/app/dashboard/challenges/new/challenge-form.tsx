@@ -3,15 +3,13 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
-import { createChallenge, type ChallengeFormState } from "./actions";
-import { LIMITS } from "@/lib/validation/challenge";
-
-const initialState: ChallengeFormState = {};
+import type { ChallengeFormAction, ChallengeFormState } from "@/lib/challenges/types";
+import { LIMITS, type ChallengeField } from "@/lib/validation/challenge";
 
 const inputClass =
   "rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-teal-700 aria-[invalid=true]:border-red-600";
 
-function SubmitButton() {
+function SubmitButton({ idle, busy }: { idle: string; busy: string }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -19,7 +17,7 @@ function SubmitButton() {
       disabled={pending}
       className="rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {pending ? "Saving…" : "Save challenge"}
+      {pending ? busy : idle}
     </button>
   );
 }
@@ -56,8 +54,25 @@ function FieldShell({
   );
 }
 
-export function ChallengeForm({ minDate }: { minDate: string }) {
-  const [state, action] = useActionState(createChallenge, initialState);
+// One form for both creating and editing a challenge. The page decides what happens on
+// submit by passing in "action", and what the fields start with via "initialValues".
+export function ChallengeForm({
+  action: submitAction,
+  initialValues,
+  minDate,
+  submitLabel = "Save challenge",
+  busyLabel = "Saving…",
+  cancelHref = "/dashboard",
+}: {
+  action: ChallengeFormAction;
+  initialValues?: Partial<Record<ChallengeField, string>>;
+  minDate?: string;
+  submitLabel?: string;
+  busyLabel?: string;
+  cancelHref?: string;
+}) {
+  const initialState: ChallengeFormState = { values: initialValues };
+  const [state, action] = useActionState(submitAction, initialState);
   const errors = state.fieldErrors ?? {};
   const values = state.values ?? {};
   const describedBy = (id: string, error?: string, hint?: string) =>
@@ -150,8 +165,8 @@ export function ChallengeForm({ minDate }: { minDate: string }) {
       </div>
 
       <div className="flex items-center gap-4">
-        <SubmitButton />
-        <Link href="/dashboard" className="text-sm font-medium text-zinc-700 underline">
+        <SubmitButton idle={submitLabel} busy={busyLabel} />
+        <Link href={cancelHref} className="text-sm font-medium text-zinc-700 underline">
           Cancel
         </Link>
       </div>

@@ -4,18 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { NOT_CONFIGURED_MESSAGE } from "@/lib/supabase/env";
-import {
-  parseChallengeForm,
-  type ChallengeField,
-  type ChallengeFieldErrors,
-} from "@/lib/validation/challenge";
-
-// What the form gets back after a try. "values" lets the form keep what was typed.
-export type ChallengeFormState = {
-  error?: string;
-  fieldErrors?: ChallengeFieldErrors;
-  values?: Partial<Record<ChallengeField, string>>;
-};
+import type { ChallengeFormState } from "@/lib/challenges/types";
+import { parseChallengeForm, type ChallengeField } from "@/lib/validation/challenge";
 
 const FIELDS: ChallengeField[] = [
   "title",

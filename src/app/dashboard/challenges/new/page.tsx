@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { APP_NAME } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
 import { todayISO } from "@/lib/validation/challenge";
+import { createChallenge } from "./actions";
 import { ChallengeForm } from "./challenge-form";
 
 export const metadata = { title: `New challenge · ${APP_NAME}` };
@@ -43,5 +44,5 @@ async function FormGate() {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) redirect("/login");
 
-  return <ChallengeForm minDate={todayISO()} />;
+  return <ChallengeForm action={createChallenge} minDate={todayISO()} />;
 }
