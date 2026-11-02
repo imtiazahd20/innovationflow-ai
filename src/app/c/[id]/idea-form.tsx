@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { IDEA_LIMITS, type IdeaFormState } from "@/lib/ideas/schema";
@@ -68,6 +69,15 @@ export function IdeaForm({
       <div role="status" className="rounded-xl border-2 border-flow-ink bg-flow-yellow p-5 text-flow-ink">
         <p className="font-display text-lg font-black uppercase">Thank you!</p>
         <p className="mt-1 text-sm">Your idea was sent to the organisers. Good luck!</p>
+        {state.discussionPath ? (
+          <p className="mt-3 text-sm">
+            <Link href={state.discussionPath} className="font-black underline">
+              Open the discussion
+            </Link>{" "}
+            to read the other ideas and share feedback. <strong>Bookmark that page:</strong> its link is your private
+            key, and we can&apos;t show it to you again.
+          </p>
+        ) : null}
       </div>
     );
   }

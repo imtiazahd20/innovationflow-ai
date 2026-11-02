@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { isChallengeId } from "@/lib/challenges/ids";
-import { parseIdeaForm, submitStatusMessage, type IdeaFormState, type IdeaField } from "@/lib/ideas/schema";
+import { parseIdeaForm, parseSubmitResult, submitStatusMessage, type IdeaFormState, type IdeaField } from "@/lib/ideas/schema";
 import { createClient } from "@/lib/supabase/server";
 import { NOT_CONFIGURED_MESSAGE } from "@/lib/supabase/env";
 
@@ -51,9 +51,10 @@ export async function submitIdea(
     return { error: submitStatusMessage(undefined) ?? undefined, values };
   }
 
-  const message = submitStatusMessage(data);
-  if (message) return { error: message, values };
+  const result = parseSubmitResult(data);
+  const message = submitStatusMessage(result.status);
+  if (message || !result.token) return { error: message ?? submitStatusMessage(undefined) ?? undefined, values };
 
   revalidatePath(`/dashboard/challenges/${id}`);
-  return { done: true };
+  return { done: true, discussionPath: `/c/${id}/discuss/${result.token}` };
 }
