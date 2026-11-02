@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isClosed, parseIdeaForm, submitStatusMessage } from "./schema";
+import { isClosed, parseIdeaForm, parseSubmitResult, submitStatusMessage } from "./schema";
 
 const form = (o: Record<string, string>) => ({ get: (k: string) => o[k] });
 const good = {
@@ -60,5 +60,16 @@ describe("isClosed", () => {
     expect(isClosed("2026-12-01", "2026-12-01")).toBe(false);
     expect(isClosed("2026-12-01", "2026-11-30")).toBe(false);
     expect(isClosed("2026-12-01", "2026-12-02")).toBe(true);
+  });
+});
+
+describe("parseSubmitResult", () => {
+  it("reads status and token", () => {
+    expect(parseSubmitResult({ status: "ok", token: "abc" })).toEqual({ status: "ok", token: "abc" });
+    expect(parseSubmitResult({ status: "duplicate" })).toEqual({ status: "duplicate", token: null });
+  });
+  it("treats anything else as an error", () => {
+    expect(parseSubmitResult(null)).toEqual({ status: "error", token: null });
+    expect(parseSubmitResult("ok")).toEqual({ status: "error", token: null });
   });
 });

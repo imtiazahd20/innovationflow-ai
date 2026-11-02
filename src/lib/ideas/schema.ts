@@ -16,6 +16,8 @@ export type IdeaFieldErrors = Partial<Record<IdeaField, string>>;
 // What an idea form gets back after a try. "values" lets the form keep what was typed.
 export type IdeaFormState = {
   done?: boolean;
+  // Private link to the discussion, shown once after a successful submit.
+  discussionPath?: string;
   error?: string;
   fieldErrors?: IdeaFieldErrors;
   values?: Partial<Record<IdeaField, string>>;
@@ -77,6 +79,15 @@ export function parseIdeaForm(form: { get(name: string): unknown }): IdeaResult 
     if (field && !errors[field]) errors[field] = issue.message;
   }
   return { ok: false, errors };
+}
+
+// The database answers {"status": "...", "token": "..."} (token only when the idea was saved).
+export function parseSubmitResult(data: unknown): { status: string; token: string | null } {
+  if (data && typeof data === "object" && "status" in data && typeof (data as { status: unknown }).status === "string") {
+    const d = data as { status: string; token?: unknown };
+    return { status: d.status, token: typeof d.token === "string" ? d.token : null };
+  }
+  return { status: "error", token: null };
 }
 
 // Turns the status word from the database function into something to show the visitor.
