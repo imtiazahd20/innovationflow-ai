@@ -13,7 +13,7 @@ export const metadata = { title: `Dashboard · ${APP_NAME}` };
 export default function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{ saved?: string; deleted?: string }>;
 }) {
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-10 px-6 py-12">
@@ -27,7 +27,7 @@ export default function DashboardPage({
 async function DashboardContent({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{ saved?: string; deleted?: string }>;
 }) {
   const supabase = await createClient();
 
@@ -50,7 +50,7 @@ async function DashboardContent({
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) redirect("/login");
 
-  const { saved } = await searchParams;
+  const { saved, deleted } = await searchParams;
 
   // Row Level Security means this only ever returns the signed-in person's own challenges.
   const { data: rows, error: loadError } = await supabase
@@ -83,9 +83,9 @@ async function DashboardContent({
         </form>
       </header>
 
-      {saved ? (
+      {saved || deleted ? (
         <p role="status" className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900">
-          Challenge saved.
+          {deleted ? "Challenge deleted." : "Challenge saved."}
         </p>
       ) : null}
 
@@ -111,17 +111,19 @@ async function DashboardContent({
           </div>
           <ul className="flex flex-col gap-3">
             {challenges.map((challenge) => (
-              <li
-                key={challenge.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-5"
-              >
-                <div className="min-w-0">
-                  <h3 className="truncate text-base font-semibold text-zinc-900">{challenge.title}</h3>
-                  <p className="mt-1 text-sm text-zinc-600">Deadline {formatDate(challenge.deadline)}</p>
-                </div>
-                <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold capitalize text-zinc-700">
-                  {challenge.status}
-                </span>
+              <li key={challenge.id}>
+                <Link
+                  href={`/dashboard/challenges/${challenge.id}`}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-5 transition-colors hover:border-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+                >
+                  <div className="min-w-0">
+                    <h3 className="truncate text-base font-semibold text-zinc-900">{challenge.title}</h3>
+                    <p className="mt-1 text-sm text-zinc-600">Deadline {formatDate(challenge.deadline)}</p>
+                  </div>
+                  <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold capitalize text-zinc-700">
+                    {challenge.status}
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>
