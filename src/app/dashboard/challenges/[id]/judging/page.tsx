@@ -6,7 +6,7 @@ import { Dropdown } from "@/components/dropdown";
 import { APP_NAME } from "@/lib/config";
 import { isChallengeId } from "@/lib/challenges/ids";
 import { formatDate } from "@/lib/format";
-import { myScores, parseJudging, rankIdeas } from "@/lib/judging/scoring";
+import { myScores, parseJudging, rankFromTotals, rankIdeas } from "@/lib/judging/scoring";
 import { createClient } from "@/lib/supabase/server";
 import { addJudge, removeJudge, saveIdeaScores } from "./actions";
 import { JudgesPanel } from "./judges-panel";
@@ -59,8 +59,10 @@ async function Judging({ params }: Props) {
   const judging = parseJudging(data);
   if (!judging) notFound();
 
-  const { role, challenge, criteria, ideas, scores, judges } = judging;
-  const ranked = rankIdeas(ideas, criteria, scores);
+  const { role, challenge, criteria, ideas, scores, judges, totals } = judging;
+  // Everyone sees the same combined totals. If the database step for totals is missing, fall back
+  // to computing them here (judges would then see only their own scores).
+  const ranked = totals ? rankFromTotals(ideas, totals) : rankIdeas(ideas, criteria, scores);
   // Comments for each idea, so judges and the owner can talk right here next to the scores.
   const { data: discussionData } = await supabase.rpc("get_discussion", { p_challenge_id: id, p_token: null });
   const discussion = parseDiscussion(discussionData);
@@ -82,7 +84,7 @@ async function Judging({ params }: Props) {
         <p className="text-sm text-zinc-800">
           {isOwner
             ? "You see the combined ranking from all judges."
-            : "You see only your own scores. The challenge owner sees the combined ranking."}{" "}
+            : "Everyone sees each idea's total score. You see only your own individual scores."}{" "}
           <Link href={`/dashboard/challenges/${challenge.id}/discuss`} className="font-bold text-flow-blue hover:underline">
             Open the discussion
           </Link>
@@ -131,13 +133,11 @@ async function Judging({ params }: Props) {
                       </p>
                       <p className="whitespace-pre-line break-words text-flow-ink">{r.idea.description}</p>
                     </div>
-                    {isOwner ? (
-                      <p className="text-sm text-zinc-800">
-                        {r.judgesScored === 0
-                          ? "No judge has finished scoring this idea yet."
-                          : `Average of ${r.judgesScored} ${r.judgesScored === 1 ? "judge" : "judges"}: ${r.average?.toFixed(1)} out of 10.`}
-                      </p>
-                    ) : null}
+                    <p className="text-sm font-medium text-flow-ink">
+                      {r.judgesScored === 0
+                        ? "Total score: not scored yet. It appears once a judge has scored every category."
+                        : `Total score: ${r.average?.toFixed(1)} out of 10 (average of ${r.judgesScored} ${r.judgesScored === 1 ? "judge" : "judges"}).`}
+                    </p>
                     <div className="flex flex-col gap-2 border-t-4 border-flow-ink pt-4">
                       <h3 className="font-display text-sm font-black uppercase text-flow-ink">Your scores</h3>
                       <ScoreForm criteria={criteria} initial={mine} action={saveIdeaScores.bind(null, challenge.id, r.idea.id)} />
