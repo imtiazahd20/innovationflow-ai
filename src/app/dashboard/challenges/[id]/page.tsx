@@ -65,7 +65,9 @@ async function ChallengeDetail({ params, searchParams }: Props) {
       </p>
     );
   }
-  if (!data) notFound();
+  // Not yours (or gone): show the public page, which shows the challenge only if it is
+  // published and otherwise says "not found". Strangers can't tell which case it was.
+  if (!data) redirect(sharePath(id));
   const { brief, ...base } = data;
   const challenge = base as Challenge;
 
