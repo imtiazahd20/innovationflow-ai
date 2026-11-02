@@ -1,7 +1,5 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import { APP_NAME, MODULES } from "@/lib/config";
-import { createClient } from "@/lib/supabase/server";
 import {
   BulbArt,
   GearsArt,
@@ -11,7 +9,7 @@ import {
   TrendArt,
 } from "@/components/illustrations";
 
-// The whole page is static (fast). Only the big buttons wait to learn who is signed in.
+// The whole page is static (fast). Signing in and out lives in the header, not here.
 
 const WHY = [
   {
@@ -81,9 +79,7 @@ export default function Home() {
                 problem, shape the plan, find the best ideas and see them through.
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-4">
-                <Suspense fallback={<BigButton href="/login" label="Sign in or create an account" />}>
-                  <AccountButton />
-                </Suspense>
+                <BigButton href="/dashboard" label="Plan a challenge" />
                 <a href="#why" className="text-sm font-bold underline decoration-2 underline-offset-4">
                   Why challenges matter ↓
                 </a>
@@ -210,9 +206,7 @@ export default function Home() {
           <h2 id="cta-heading" className="max-w-3xl font-display text-3xl font-black uppercase tracking-tight sm:text-5xl">
             Got a problem worth solving? Start your first challenge.
           </h2>
-          <Suspense fallback={<BigButton href="/login" label="Sign in or create an account" />}>
-            <AccountButton />
-          </Suspense>
+          <BigButton href="/dashboard" label="Plan a challenge" />
         </div>
       </section>
 
@@ -251,16 +245,6 @@ function IdeaBoard() {
         </div>
       </div>
     </div>
-  );
-}
-
-async function AccountButton() {
-  const supabase = await createClient();
-  const { data } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
-  return data.user ? (
-    <BigButton href="/dashboard" label="Go to your dashboard" />
-  ) : (
-    <BigButton href="/login" label="Sign in or create an account" />
   );
 }
 
