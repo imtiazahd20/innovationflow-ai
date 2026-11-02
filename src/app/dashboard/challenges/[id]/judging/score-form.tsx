@@ -17,10 +17,14 @@ export function ScoreForm({
   const [state, formAction, pending] = useActionState(action, {});
   return (
     <form action={formAction} className="flex flex-col gap-3">
-      <ul className="flex flex-col gap-2">
+      {/* Two columns side by side (3 + 3 for six criteria); one column on narrow phones. */}
+      <ul
+        className="grid grid-cols-1 gap-2 sm:grid-flow-col sm:grid-cols-2 sm:[grid-template-rows:repeat(var(--rows),auto)]"
+        style={{ "--rows": Math.ceil(criteria.length / 2) } as React.CSSProperties}
+      >
         {criteria.map((c) => (
-          <li key={c.id} className="flex items-center justify-between gap-3 rounded-lg border-2 border-flow-ink bg-white p-3">
-            <label htmlFor={`s-${c.id}`} className="min-w-0 text-sm font-medium text-flow-ink">
+          <li key={c.id} className="flex items-center justify-between gap-2 rounded-lg border-2 border-flow-ink bg-white px-2 py-1.5">
+            <label htmlFor={`s-${c.id}`} className="min-w-0 text-xs font-medium leading-tight text-flow-ink">
               {c.name} <span className="text-zinc-700">· {c.weight}%</span>
             </label>
             <input
@@ -33,7 +37,7 @@ export function ScoreForm({
               inputMode="numeric"
               defaultValue={initial[c.id] ?? ""}
               placeholder="0-10"
-              className="w-20 rounded-lg border-2 border-flow-ink px-2 py-1 text-right text-flow-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
+              className="w-14 shrink-0 rounded-md border-2 border-flow-ink px-1.5 py-0.5 text-right text-flow-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
             />
           </li>
         ))}
