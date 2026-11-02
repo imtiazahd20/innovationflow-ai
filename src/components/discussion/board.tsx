@@ -29,10 +29,12 @@ type Props = {
   postAction: (ideaId: string, body: string, files: UploadedFile[]) => Promise<PostResult>;
   // Only the owner gets this: removes one comment.
   deleteAction?: (commentId: string) => Promise<void>;
+  // Only the owner gets this: each submitter's email and private discussion address.
+  ownerInfo?: Record<string, { email: string; path: string }>;
 };
 
 // All ideas of a challenge as small cards. A click opens the idea with its comment thread.
-export function DiscussionBoard({ discussion, uploadFolder, postAction, deleteAction }: Props) {
+export function DiscussionBoard({ discussion, uploadFolder, postAction, deleteAction, ownerInfo }: Props) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -158,6 +160,26 @@ export function DiscussionBoard({ discussion, uploadFolder, postAction, deleteAc
               {selected.submitter_name} · {formatDate(selected.created_at)}
             </p>
             <p className="whitespace-pre-line break-words">{selected.description}</p>
+            {ownerInfo?.[selected.id] ? (
+              <div className="flex flex-col gap-1 rounded-xl border-2 border-dashed border-flow-ink p-3 text-sm">
+                <p>
+                  <strong>Submitter email (only you see this):</strong>{" "}
+                  <a href={`mailto:${ownerInfo[selected.id].email}`} className="text-flow-blue hover:underline">
+                    {ownerInfo[selected.id].email}
+                  </a>
+                </p>
+                <label htmlFor="private-link" className="font-medium">
+                  Their private discussion link (send it if they lost theirs):
+                </label>
+                <input
+                  id="private-link"
+                  readOnly
+                  value={`${typeof window === "undefined" ? "" : window.location.origin}${ownerInfo[selected.id].path}`}
+                  onFocus={(e) => e.currentTarget.select()}
+                  className="rounded-lg border-2 border-flow-ink bg-white px-2 py-1 text-xs"
+                />
+              </div>
+            ) : null}
 
             <section aria-labelledby="comments-heading" className="flex flex-col gap-3 border-t-4 border-flow-ink pt-4">
               <div className="flex items-center justify-between gap-3">
