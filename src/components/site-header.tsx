@@ -40,14 +40,15 @@ export function SiteHeader() {
         <Link
           href="/"
           aria-label={APP_NAME}
-          className="flex min-w-0 items-center gap-1.5 font-display text-xs font-black uppercase tracking-tight text-flow-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink min-[400px]:text-sm sm:text-lg"
+          className="flex min-w-0 items-center gap-1.5 font-display text-sm font-black tracking-tight text-flow-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink sm:text-xl"
         >
           <BulbArt className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" />
-          {/* On very narrow phones only the bulb shows, so the three buttons fit. */}
-          <span className="hidden min-[480px]:inline">{APP_NAME}</span>
+          {/* The name is part of the logo and is written exactly as "InnovationFlow AI" (no all-caps). */}
+          <span className="truncate whitespace-nowrap">{APP_NAME}</span>
         </Link>
         <ul className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <li>
+          {/* On very narrow phones the logo already goes Home, so this button makes room. */}
+          <li className="hidden min-[480px]:block">
             <Link href="/" className={link}>
               Home
             </Link>
