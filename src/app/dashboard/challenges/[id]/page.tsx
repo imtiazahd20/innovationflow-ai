@@ -77,6 +77,15 @@ async function ChallengeDetail({ params, searchParams }: Props) {
     supabase.from("judging_criteria").select("id, name, description, weight").eq("challenge_id", id).order("position"),
     supabase.from("timeline_phases").select("id, name, description, starts_on, ends_on").eq("challenge_id", id).order("position"),
   ]);
+  // Ideas sent in through the public page. Only the owner can read them (Row Level Security).
+  const ideasResult = await supabase
+    .from("ideas")
+    .select("id, submitter_name, submitter_email, title, description, created_at")
+    .eq("challenge_id", id)
+    .order("created_at", { ascending: false });
+  const ideas = ideasResult.data ?? [];
+  const ideasFailed = Boolean(ideasResult.error);
+  if (ideasResult.error) console.error("load ideas failed", ideasResult.error.code);
   const criteria = criteriaResult.data ?? [];
   const phases = phasesResult.data ?? [];
 
@@ -174,6 +183,39 @@ async function ChallengeDetail({ params, searchParams }: Props) {
             No plan yet. Create one to write the brief, set how entries are judged and lay out the timeline. You can
             start from an automatic draft.
           </p>
+        )}
+      </section>
+
+      <section aria-labelledby="ideas-heading" className="flex flex-col gap-4 border-t-4 border-flow-ink pt-6">
+        <h2 id="ideas-heading" className="font-display text-xl font-black uppercase text-flow-ink">
+          Ideas received ({ideas.length})
+        </h2>
+        {ideasFailed ? (
+          <p role="alert" className="rounded-lg border-2 border-flow-ink bg-flow-red px-4 py-3 text-sm text-white">
+            We couldn&apos;t load the ideas. Reload the page to try again.
+          </p>
+        ) : ideas.length === 0 ? (
+          <p className="text-sm text-zinc-800">
+            {challenge.status === "published"
+              ? "No ideas yet. Share the link above and they will appear here."
+              : "Publish the challenge and share its link to start receiving ideas."}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {ideas.map((idea) => (
+              <li key={idea.id} className="rounded-lg border-2 border-flow-ink bg-white p-4">
+                <h3 className="font-bold text-flow-ink">{idea.title}</h3>
+                <p className="mt-1 text-sm text-zinc-800">
+                  {idea.submitter_name} ·{" "}
+                  <a href={`mailto:${idea.submitter_email}`} className="text-flow-blue hover:underline">
+                    {idea.submitter_email}
+                  </a>{" "}
+                  · {formatDate(idea.created_at)}
+                </p>
+                <p className="mt-2 whitespace-pre-line text-flow-ink">{idea.description}</p>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 
