@@ -6,6 +6,7 @@ import { APP_NAME } from "@/lib/config";
 import { isChallengeId } from "@/lib/challenges/ids";
 import { parseDiscussion } from "@/lib/discussion/schema";
 import { createClient } from "@/lib/supabase/server";
+import { ChallengeTabs } from "../challenge-tabs";
 import { deleteComment, postStaffComment } from "./actions";
 
 export const metadata = { title: `Discussion · ${APP_NAME}` };
@@ -59,6 +60,7 @@ async function Discussion({ params }: Props) {
       >
         ← {isOwner ? "Back to the challenge" : "Your dashboard"}
       </Link>
+      <ChallengeTabs id={id} current="discuss" canEdit={isOwner} />
       <header className="flex flex-col gap-3">
         <p className="text-sm font-black uppercase tracking-widest text-flow-red">Idea discussion</p>
         <h1 className="font-display text-3xl font-black uppercase tracking-tight text-flow-ink">{discussion.challenge.title}</h1>
