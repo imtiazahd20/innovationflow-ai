@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { APP_NAME } from "@/lib/config";
@@ -6,8 +7,10 @@ import { isChallengeId } from "@/lib/challenges/ids";
 import type { Challenge } from "@/lib/challenges/types";
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
-import { deleteChallenge } from "./actions";
+import { sharePath } from "@/lib/challenges/public";
+import { deleteChallenge, setPublished } from "./actions";
 import { DeleteButton } from "./delete-button";
+import { PublishPanel } from "./publish-panel";
 
 export const metadata = { title: `Challenge · ${APP_NAME}` };
 
@@ -74,6 +77,12 @@ async function ChallengeDetail({ params, searchParams }: Props) {
   ]);
   const criteria = criteriaResult.data ?? [];
   const phases = phasesResult.data ?? [];
+
+  // Build the full link from the address the person is visiting right now.
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3000";
+  const proto = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  const shareUrl = `${proto}://${host}${sharePath(challenge.id)}`;
 
   return (
     <>
@@ -165,6 +174,13 @@ async function ChallengeDetail({ params, searchParams }: Props) {
           </p>
         )}
       </section>
+
+      <PublishPanel
+        key={challenge.status}
+        published={challenge.status === "published"}
+        shareUrl={shareUrl}
+        action={setPublished.bind(null, challenge.id)}
+      />
 
       <div className="flex flex-wrap items-start gap-3 border-t-4 border-flow-ink pt-6">
         <Link

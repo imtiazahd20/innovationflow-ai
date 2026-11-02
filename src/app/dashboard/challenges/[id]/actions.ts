@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isChallengeId } from "@/lib/challenges/ids";
+import { publishBlocker } from "@/lib/challenges/public";
 import type { ChallengeFormState } from "@/lib/challenges/types";
 import { createClient } from "@/lib/supabase/server";
 import { NOT_CONFIGURED_MESSAGE } from "@/lib/supabase/env";
@@ -93,4 +94,49 @@ export async function deleteChallenge(id: string): Promise<DeleteState> {
 
   revalidatePath("/dashboard");
   redirect("/dashboard?deleted=1");
+}
+
+export type PublishState = { error?: string };
+
+// Publishes (or takes back to draft) one of the signed-in person's challenges. Row Level
+// Security guarantees the update can only touch their own row.
+export async function setPublished(id: string, publish: boolean): Promise<PublishState> {
+  if (!isChallengeId(id)) return { error: NOT_FOUND_MESSAGE };
+
+  const supabase = await createClient();
+  if (!supabase) return { error: NOT_CONFIGURED_MESSAGE };
+
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) redirect("/login");
+
+  if (publish) {
+    const { data: current, error: loadError } = await supabase
+      .from("challenges")
+      .select("brief")
+      .eq("id", id)
+      .maybeSingle();
+    if (loadError) {
+      console.error("setPublished load failed", loadError.code);
+      return { error: "We couldn't check this challenge. Please try again in a moment." };
+    }
+    if (!current) return { error: NOT_FOUND_MESSAGE };
+    const blocker = publishBlocker(current.brief);
+    if (blocker) return { error: blocker };
+  }
+
+  const { data: updated, error } = await supabase
+    .from("challenges")
+    .update({ status: publish ? "published" : "draft" })
+    .eq("id", id)
+    .select("id");
+  if (error) {
+    console.error("setPublished failed", error.code);
+    return { error: "We couldn't change the status. Please try again in a moment." };
+  }
+  if (!updated || updated.length === 0) return { error: NOT_FOUND_MESSAGE };
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/challenges/${id}`);
+  revalidatePath(`/c/${id}`);
+  return {};
 }
