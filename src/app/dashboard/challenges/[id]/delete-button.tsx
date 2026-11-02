@@ -23,7 +23,7 @@ export function DeleteButton({ action }: { action: () => Promise<DeleteState> })
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+        className="rounded-lg border-2 border-flow-ink bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-flow-red hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
       >
         Delete
       </button>
@@ -31,8 +31,8 @@ export function DeleteButton({ action }: { action: () => Promise<DeleteState> })
   }
 
   return (
-    <div role="alertdialog" aria-label="Confirm delete" className="flex flex-col gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-      <p className="text-sm font-medium text-red-900">
+    <div role="alertdialog" aria-label="Confirm delete" className="flex flex-col gap-3 rounded-lg border-2 border-flow-ink bg-flow-yellow p-4">
+      <p className="text-sm font-medium text-flow-ink">
         Delete this challenge for good? This can&apos;t be undone.
       </p>
       <div className="flex gap-3">
@@ -40,7 +40,7 @@ export function DeleteButton({ action }: { action: () => Promise<DeleteState> })
           type="button"
           onClick={confirmDelete}
           disabled={pending}
-          className="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-lg border-2 border-flow-ink bg-flow-red px-4 py-2 text-sm font-black uppercase text-white transition-colors hover:bg-flow-orange hover:text-flow-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink disabled:cursor-not-allowed disabled:opacity-60"
         >
           {pending ? "Deleting…" : "Yes, delete it"}
         </button>
@@ -48,13 +48,13 @@ export function DeleteButton({ action }: { action: () => Promise<DeleteState> })
           type="button"
           onClick={() => setConfirming(false)}
           disabled={pending}
-          className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-60"
+          className="rounded-lg border-2 border-flow-ink bg-white px-4 py-2 text-sm font-medium text-flow-ink hover:bg-flow-yellow disabled:opacity-60"
         >
           Keep it
         </button>
       </div>
       {error ? (
-        <p role="alert" className="text-sm text-red-800">
+        <p role="alert" className="text-sm font-bold text-flow-ink">
           {error}
         </p>
       ) : null}
