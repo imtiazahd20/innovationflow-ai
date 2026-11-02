@@ -11,6 +11,9 @@ import { createClient } from "@/lib/supabase/server";
 import { sharePath } from "@/lib/challenges/public";
 import { deleteChallenge, setPublished } from "./actions";
 import { DeleteButton } from "./delete-button";
+import { DiscussionBoard } from "@/components/discussion/board";
+import { parseDiscussion } from "@/lib/discussion/schema";
+import { deleteComment, postStaffComment } from "./discuss/actions";
 import { IdeaCards } from "./idea-cards";
 import { PublishPanel } from "./publish-panel";
 
@@ -82,12 +85,19 @@ async function ChallengeDetail({ params, searchParams }: Props) {
   // Ideas sent in through the public page. Only the owner can read them (Row Level Security).
   const ideasResult = await supabase
     .from("ideas")
-    .select("id, submitter_name, submitter_email, title, description, created_at")
+    .select("id, submitter_name, submitter_email, title, description, created_at, thread_token")
     .eq("challenge_id", id)
     .order("created_at", { ascending: false });
   const ideas = ideasResult.data ?? [];
   const ideasFailed = Boolean(ideasResult.error);
   if (ideasResult.error) console.error("load ideas failed", ideasResult.error.code);
+  // The same ideas with their comment threads. If the Milestone 7 database step is missing this
+  // fails, and the page falls back to the plain idea cards below.
+  const { data: discussionData } = await supabase.rpc("get_discussion", { p_challenge_id: id, p_token: null });
+  const discussion = parseDiscussion(discussionData);
+  const ownerInfo = Object.fromEntries(
+    ideas.map((i) => [i.id, { email: i.submitter_email, path: `/c/${id}/discuss/${i.thread_token}` }]),
+  );
   const criteria = criteriaResult.data ?? [];
   const phases = phasesResult.data ?? [];
 
@@ -206,6 +216,14 @@ async function ChallengeDetail({ params, searchParams }: Props) {
               ? "No ideas yet. Share the link above and they will appear here."
               : "Publish the challenge and share its link to start receiving ideas."}
           </p>
+        ) : discussion ? (
+          <DiscussionBoard
+            discussion={discussion}
+            uploadFolder={`c/${id}`}
+            postAction={postStaffComment.bind(null, id)}
+            deleteAction={deleteComment.bind(null, id)}
+            ownerInfo={ownerInfo}
+          />
         ) : (
           <IdeaCards ideas={ideas} />
         )}
