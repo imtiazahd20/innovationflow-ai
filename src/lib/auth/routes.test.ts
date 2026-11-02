@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isAuthPage, isProtectedPath, redirectTargetFor } from "./routes";
+import { isAuthPage, isProtectedPath, publicPathFor, redirectTargetFor } from "./routes";
 
 describe("isProtectedPath", () => {
   it("protects the dashboard and everything under it", () => {
@@ -40,5 +40,25 @@ describe("redirectTargetFor", () => {
     expect(redirectTargetFor("/", true)).toBeNull();
     expect(redirectTargetFor("/login", false)).toBeNull();
     expect(redirectTargetFor("/dashboard", true)).toBeNull();
+  });
+});
+
+describe("shared challenge addresses", () => {
+  const id = "11111111-1111-4111-8111-111111111111";
+
+  it("sends logged-out visitors from a challenge address to its public page", () => {
+    expect(redirectTargetFor(`/dashboard/challenges/${id}`, false)).toBe(`/c/${id}`);
+    expect(redirectTargetFor(`/dashboard/challenges/${id}/`, false)).toBe(`/c/${id}`);
+  });
+
+  it("keeps edit and plan pages private", () => {
+    expect(redirectTargetFor(`/dashboard/challenges/${id}/edit`, false)).toBe("/login");
+    expect(redirectTargetFor(`/dashboard/challenges/${id}/plan`, false)).toBe("/login");
+    expect(redirectTargetFor("/dashboard/challenges/new", false)).toBe("/login");
+    expect(publicPathFor("/dashboard/challenges/not-an-id")).toBeNull();
+  });
+
+  it("leaves signed-in people where they are", () => {
+    expect(redirectTargetFor(`/dashboard/challenges/${id}`, true)).toBeNull();
   });
 });

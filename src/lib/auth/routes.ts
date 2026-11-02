@@ -19,12 +19,26 @@ export function isAuthPage(pathname: string): boolean {
   return AUTH_PAGES.some((page) => matchesPrefix(pathname, page));
 }
 
+// The address of a single challenge in the private area: /dashboard/challenges/<id>.
+// People often copy this address from the browser bar and share it, so visitors who are
+// not signed in are sent to the public page for that challenge instead of the login page.
+const CHALLENGE_URL = /^\/dashboard\/challenges\/([0-9a-fA-F-]{36})\/?$/;
+
+export function publicPathFor(pathname: string): string | null {
+  const match = CHALLENGE_URL.exec(pathname);
+  return match ? `/c/${match[1]}` : null;
+}
+
 // Returns the path to redirect to, or null when the visitor may stay where they are.
 export function redirectTargetFor(
   pathname: string,
   isLoggedIn: boolean,
 ): string | null {
-  if (!isLoggedIn && isProtectedPath(pathname)) return "/login";
+  if (!isLoggedIn) {
+    const publicPath = publicPathFor(pathname);
+    if (publicPath) return publicPath;
+    if (isProtectedPath(pathname)) return "/login";
+  }
   if (isLoggedIn && isAuthPage(pathname)) return "/dashboard";
   return null;
 }
