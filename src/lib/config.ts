@@ -23,7 +23,7 @@ export const MODULES: AppModule[] = [
     id: "sprint-planner",
     name: "Innovation Sprint Planner",
     description:
-      "Create a challenge, then let AI draft the brief, judging criteria and timeline for you to refine.",
+      "Create a challenge, then draft the brief, judging criteria and timeline from a starter template and refine them.",
     status: "in-progress",
   },
   {
