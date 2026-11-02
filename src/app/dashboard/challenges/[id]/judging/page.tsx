@@ -11,6 +11,9 @@ import { createClient } from "@/lib/supabase/server";
 import { addJudge, removeJudge, saveIdeaScores } from "./actions";
 import { JudgesPanel } from "./judges-panel";
 import { ScoreForm } from "./score-form";
+import { CommentThread } from "@/components/discussion/thread";
+import { parseDiscussion } from "@/lib/discussion/schema";
+import { deleteComment, postStaffComment } from "../discuss/actions";
 
 export const metadata = { title: `Judging · ${APP_NAME}` };
 
@@ -58,6 +61,9 @@ async function Judging({ params }: Props) {
 
   const { role, challenge, criteria, ideas, scores, judges } = judging;
   const ranked = rankIdeas(ideas, criteria, scores);
+  // Comments for each idea, so judges and the owner can talk right here next to the scores.
+  const { data: discussionData } = await supabase.rpc("get_discussion", { p_challenge_id: id, p_token: null });
+  const discussion = parseDiscussion(discussionData);
   const isOwner = role === "owner";
 
   return (
@@ -136,6 +142,19 @@ async function Judging({ params }: Props) {
                       <h3 className="font-display text-sm font-black uppercase text-flow-ink">Your scores</h3>
                       <ScoreForm criteria={criteria} initial={mine} action={saveIdeaScores.bind(null, challenge.id, r.idea.id)} />
                     </div>
+                    {(() => {
+                      const thread = discussion?.ideas.find((i) => i.id === r.idea.id);
+                      return thread && discussion ? (
+                        <CommentThread
+                          idea={thread}
+                          viewer={discussion.viewer}
+                          uploadFolder={`c/${challenge.id}`}
+                          postAction={postStaffComment.bind(null, challenge.id)}
+                          deleteAction={isOwner ? deleteComment.bind(null, challenge.id) : undefined}
+                          uid={r.idea.id}
+                        />
+                      ) : null;
+                    })()}
                   </div>
                 </Dropdown>
               );
