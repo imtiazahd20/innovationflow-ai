@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sharePath } from "@/lib/challenges/public";
 import { deleteChallenge, setPublished } from "./actions";
 import { DeleteButton } from "./delete-button";
+import { IdeaCards } from "./idea-cards";
 import { PublishPanel } from "./publish-panel";
 
 export const metadata = { title: `Challenge · ${APP_NAME}` };
@@ -206,21 +207,7 @@ async function ChallengeDetail({ params, searchParams }: Props) {
               : "Publish the challenge and share its link to start receiving ideas."}
           </p>
         ) : (
-          <ul className="flex flex-col gap-3">
-            {ideas.map((idea) => (
-              <li key={idea.id} className="rounded-lg border-2 border-flow-ink bg-white p-4">
-                <h3 className="font-bold text-flow-ink">{idea.title}</h3>
-                <p className="mt-1 text-sm text-zinc-800">
-                  {idea.submitter_name} ·{" "}
-                  <a href={`mailto:${idea.submitter_email}`} className="text-flow-blue hover:underline">
-                    {idea.submitter_email}
-                  </a>{" "}
-                  · {formatDate(idea.created_at)}
-                </p>
-                <p className="mt-2 whitespace-pre-line text-flow-ink">{idea.description}</p>
-              </li>
-            ))}
-          </ul>
+          <IdeaCards ideas={ideas} />
         )}
       </section>
 
