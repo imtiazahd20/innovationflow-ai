@@ -13,7 +13,7 @@ export const metadata = { title: `Challenge · ${APP_NAME}` };
 
 type Props = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ updated?: string }>;
+  searchParams: Promise<{ updated?: string; planned?: string }>;
 };
 
 export default function ChallengePage({ params, searchParams }: Props) {
@@ -31,7 +31,7 @@ export default function ChallengePage({ params, searchParams }: Props) {
 
 async function ChallengeDetail({ params, searchParams }: Props) {
   const { id } = await params;
-  const { updated } = await searchParams;
+  const { updated, planned } = await searchParams;
   if (!isChallengeId(id)) notFound();
 
   const supabase = await createClient();
@@ -50,7 +50,7 @@ async function ChallengeDetail({ params, searchParams }: Props) {
   // as an id that doesn't exist: "not found".
   const { data, error } = await supabase
     .from("challenges")
-    .select("id, title, business_problem, objectives, target_participants, deadline, status, created_at, updated_at")
+    .select("id, title, business_problem, objectives, target_participants, deadline, status, created_at, updated_at, brief")
     .eq("id", id)
     .maybeSingle();
 
@@ -63,13 +63,23 @@ async function ChallengeDetail({ params, searchParams }: Props) {
     );
   }
   if (!data) notFound();
-  const challenge = data as Challenge;
+  const { brief, ...base } = data;
+  const challenge = base as Challenge;
+
+  // Plan rows are optional: a challenge starts with none. A load problem here shouldn't
+  // hide the challenge itself, so we fall back to showing "not set yet".
+  const [criteriaResult, phasesResult] = await Promise.all([
+    supabase.from("judging_criteria").select("id, name, description, weight").eq("challenge_id", id).order("position"),
+    supabase.from("timeline_phases").select("id, name, description, starts_on, ends_on").eq("challenge_id", id).order("position"),
+  ]);
+  const criteria = criteriaResult.data ?? [];
+  const phases = phasesResult.data ?? [];
 
   return (
     <>
-      {updated ? (
+      {updated || planned ? (
         <p role="status" className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900">
-          Changes saved.
+          {planned ? "Plan saved." : "Changes saved."}
         </p>
       ) : null}
 
@@ -88,6 +98,73 @@ async function ChallengeDetail({ params, searchParams }: Props) {
         <Detail label="Objectives" value={challenge.objectives} />
         <Detail label="Target participants" value={challenge.target_participants} />
       </dl>
+
+      <section aria-labelledby="plan-heading" className="flex flex-col gap-6 border-t border-zinc-200 pt-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="plan-heading" className="text-xl font-semibold text-zinc-900">
+            Brief, criteria and timeline
+          </h2>
+          <Link
+            href={`/dashboard/challenges/${challenge.id}/plan`}
+            className="rounded-lg border border-teal-700 px-4 py-2 text-sm font-semibold text-teal-800 transition-colors hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+          >
+            {brief || criteria.length > 0 || phases.length > 0 ? "Edit plan" : "Create plan"}
+          </Link>
+        </div>
+
+        {brief || criteria.length > 0 || phases.length > 0 ? (
+          <>
+            <div className="flex flex-col gap-1">
+              <h3 className="text-sm font-medium text-zinc-500">Brief</h3>
+              {brief ? (
+                <p className="whitespace-pre-line text-zinc-900">{brief}</p>
+              ) : (
+                <p className="text-sm text-zinc-500">Not written yet.</p>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <h3 className="text-sm font-medium text-zinc-500">Judging criteria</h3>
+              {criteria.length === 0 ? (
+                <p className="text-sm text-zinc-500">None yet.</p>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {criteria.map((c) => (
+                    <li key={c.id} className="rounded-lg border border-zinc-200 bg-white p-3">
+                      <p className="font-medium text-zinc-900">
+                        {c.name} <span className="text-zinc-500">· {c.weight}%</span>
+                      </p>
+                      {c.description ? <p className="mt-1 text-sm text-zinc-600">{c.description}</p> : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <h3 className="text-sm font-medium text-zinc-500">Timeline</h3>
+              {phases.length === 0 ? (
+                <p className="text-sm text-zinc-500">None yet.</p>
+              ) : (
+                <ol className="flex flex-col gap-2">
+                  {phases.map((p) => (
+                    <li key={p.id} className="rounded-lg border border-zinc-200 bg-white p-3">
+                      <p className="font-medium text-zinc-900">{p.name}</p>
+                      <p className="text-sm text-zinc-600">
+                        {formatDate(p.starts_on)} – {formatDate(p.ends_on)}
+                      </p>
+                      {p.description ? <p className="mt-1 text-sm text-zinc-600">{p.description}</p> : null}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          </>
+        ) : (
+          <p className="text-sm text-zinc-600">
+            No plan yet. Create one to write the brief, set how entries are judged and lay out the timeline. You can
+            start from an automatic draft.
+          </p>
+        )}
+      </section>
 
       <div className="flex flex-wrap items-start gap-3 border-t border-zinc-200 pt-6">
         <Link
