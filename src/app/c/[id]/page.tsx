@@ -4,8 +4,12 @@ import { notFound } from "next/navigation";
 import { APP_NAME } from "@/lib/config";
 import { isChallengeId } from "@/lib/challenges/ids";
 import { parsePublicChallenge } from "@/lib/challenges/public";
+import { isClosed } from "@/lib/ideas/schema";
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
+import { todayISO } from "@/lib/validation/challenge";
+import { submitIdea } from "./actions";
+import { IdeaForm } from "./idea-form";
 
 // Public, read-only page for a published challenge. No sign-in needed.
 // "noindex" asks search engines not to list it: it is shared by link, not advertised.
@@ -110,6 +114,19 @@ async function PublicChallenge({ params }: Props) {
           </ol>
         </section>
       ) : null}
+
+      <section aria-labelledby="idea-heading" className="flex flex-col gap-4 border-t-4 border-flow-ink pt-6">
+        <h2 id="idea-heading" className="font-display text-xl font-black uppercase text-flow-ink">
+          Share your idea
+        </h2>
+        {isClosed(challenge.deadline, todayISO()) ? (
+          <p className="rounded-xl border-2 border-flow-ink bg-white p-5 text-flow-ink">
+            Submissions for this challenge closed on {formatDate(challenge.deadline)}.
+          </p>
+        ) : (
+          <IdeaForm action={submitIdea.bind(null, id)} />
+        )}
+      </section>
 
       <p className="border-t-4 border-flow-ink pt-6 text-sm text-zinc-800">
         Made with{" "}
