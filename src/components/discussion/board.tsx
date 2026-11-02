@@ -5,6 +5,14 @@ import { formatDate } from "@/lib/format";
 import type { Discussion, PostResult, UploadedFile } from "@/lib/discussion/schema";
 import { CommentThread } from "./thread";
 
+type Idea = Discussion["ideas"][number];
+
+// The idea's total score, written the same way everywhere.
+function scoreLabel(idea: Idea): string {
+  if (idea.average == null) return "Not scored yet";
+  return `Score ${idea.average.toFixed(1)}/10${idea.rank ? ` · #${idea.rank}` : ""}`;
+}
+
 type Props = {
   discussion: Discussion;
   // The folder uploads go into: "t/<private key>" for participants, "c/<challenge id>" for staff.
@@ -52,6 +60,9 @@ export function DiscussionBoard({ discussion, uploadFolder, postAction, deleteAc
               </span>
               <span className="font-display text-lg font-black uppercase leading-tight text-flow-ink">{idea.title}</span>
               <span className="line-clamp-2 text-sm text-zinc-800">{idea.description}</span>
+              <span className="w-fit rounded-full border-2 border-flow-ink bg-flow-yellow px-2 py-0.5 text-xs font-black text-flow-ink">
+                {scoreLabel(idea)}
+              </span>
               <span className="mt-auto pt-1 text-xs text-zinc-700">
                 {idea.comments.length} {idea.comments.length === 1 ? "comment" : "comments"} · Open
               </span>
@@ -87,6 +98,11 @@ export function DiscussionBoard({ discussion, uploadFolder, postAction, deleteAc
               {selected.submitter_name} · {formatDate(selected.created_at)}
             </p>
             <p className="whitespace-pre-line break-words">{selected.description}</p>
+            <p className="rounded-xl border-2 border-flow-ink bg-flow-yellow p-3 text-sm font-medium">
+              {selected.average == null
+                ? "Total score: not scored yet. It appears once a judge has scored every category."
+                : `Total score: ${selected.average.toFixed(1)} out of 10${selected.rank ? ` · rank #${selected.rank}` : ""} · average of ${selected.judges_scored ?? 0} ${selected.judges_scored === 1 ? "judge" : "judges"}`}
+            </p>
             {ownerInfo?.[selected.id] ? (
               <div className="flex flex-col gap-1 rounded-xl border-2 border-dashed border-flow-ink p-3 text-sm">
                 <p>
