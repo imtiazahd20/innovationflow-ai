@@ -91,6 +91,11 @@ const discussionSchema = z.object({
       title: z.string(),
       description: z.string(),
       created_at: z.string(),
+      // The idea's total score (0-10), how many judges finished scoring it and its rank.
+      // null until a judge has scored every category.
+      average: z.number().nullish(),
+      judges_scored: z.number().nullish(),
+      rank: z.number().nullish(),
       comments: z.array(
         z.object({
           id: z.string(),
