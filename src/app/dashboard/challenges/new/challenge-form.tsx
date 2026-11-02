@@ -7,7 +7,7 @@ import type { ChallengeFormAction, ChallengeFormState } from "@/lib/challenges/t
 import { LIMITS, type ChallengeField } from "@/lib/validation/challenge";
 
 const inputClass =
-  "rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-teal-700 aria-[invalid=true]:border-red-600";
+  "rounded-lg border-2 border-flow-ink bg-white px-3 py-2.5 text-sm text-flow-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-flow-ink aria-[invalid=true]:border-flow-red";
 
 function SubmitButton({ idle, busy }: { idle: string; busy: string }) {
   const { pending } = useFormStatus();
@@ -15,7 +15,7 @@ function SubmitButton({ idle, busy }: { idle: string; busy: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+      className="rounded-lg border-2 border-flow-ink bg-flow-yellow shadow-[3px_3px_0_0_#0d0d0d] px-5 py-2.5 text-sm font-black uppercase text-flow-ink transition-colors hover:bg-flow-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? busy : idle}
     </button>
@@ -37,7 +37,7 @@ function FieldShell({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-zinc-800">
+      <label htmlFor={id} className="text-sm font-medium text-flow-ink">
         {label}
       </label>
       {children}
@@ -46,7 +46,7 @@ function FieldShell({
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="text-sm text-zinc-500">
+        <p id={`${id}-hint`} className="text-sm text-zinc-700">
           {hint}
         </p>
       ) : null}
@@ -84,7 +84,7 @@ export function ChallengeForm({
   const participantsHint = "Who should take part? For example, a team, a department or customers.";
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-6">
+    <form action={action} noValidate className="flex flex-col gap-6 rounded-2xl border-4 border-flow-ink bg-white p-6 shadow-[6px_6px_0_0_#0d0d0d]">
       <FieldShell id="title" label="Challenge title" hint={titleHint} error={errors.title}>
         <input
           id="title"
@@ -158,7 +158,7 @@ export function ChallengeForm({
 
       <div aria-live="polite">
         {state.error ? (
-          <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          <p role="alert" className="rounded-lg border-2 border-flow-ink bg-flow-red px-3 py-2 text-sm text-white">
             {state.error}
           </p>
         ) : null}
@@ -166,7 +166,7 @@ export function ChallengeForm({
 
       <div className="flex items-center gap-4">
         <SubmitButton idle={submitLabel} busy={busyLabel} />
-        <Link href={cancelHref} className="text-sm font-medium text-zinc-700 underline">
+        <Link href={cancelHref} className="text-sm font-medium text-flow-ink underline">
           Cancel
         </Link>
       </div>
