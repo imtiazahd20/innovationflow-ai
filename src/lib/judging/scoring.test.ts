@@ -5,6 +5,7 @@ import {
   parseJudgeEmail,
   parseJudging,
   parseScoreForm,
+  rankFromTotals,
   rankIdeas,
   type Criterion,
   type JudgingIdea,
@@ -108,5 +109,41 @@ describe("misc", () => {
     expect(
       parseJudging({ role: "owner", challenge: { id: "x", title: "t", status: "draft" }, criteria: [], ideas: [], scores: [], judges: [] }),
     ).not.toBeNull();
+  });
+});
+
+describe("rankFromTotals", () => {
+  const mk = (id: string, created: string) => ({ id, submitter_name: id, title: id, description: "d", created_at: created });
+  const ideas = [mk("a", "2026-01-01"), mk("b", "2026-01-02"), mk("c", "2026-01-03"), mk("d", "2026-01-04")];
+
+  it("orders by the database rank, ties keep their shared rank, unscored go last", () => {
+    const totals = [
+      { idea_id: "c", average: 9, judges_scored: 2, rank: 1 },
+      { idea_id: "a", average: 7.5, judges_scored: 1, rank: 2 },
+      { idea_id: "b", average: 7.5, judges_scored: 3, rank: 2 },
+    ];
+    const out = rankFromTotals(ideas, totals);
+    expect(out.map((r) => r.idea.id)).toEqual(["c", "a", "b", "d"]);
+    expect(out.map((r) => r.rank)).toEqual([1, 2, 2, null]);
+    expect(out[0]).toMatchObject({ average: 9, judgesScored: 2 });
+    expect(out[3]).toMatchObject({ average: null, judgesScored: 0 });
+  });
+
+  it("works with no totals at all", () => {
+    expect(rankFromTotals(ideas, []).every((r) => r.rank === null)).toBe(true);
+  });
+
+  it("parseJudging accepts data with or without totals", () => {
+    const base = {
+      role: "judge",
+      challenge: { id: "x", title: "t", status: "published" },
+      criteria: [],
+      ideas: [],
+      scores: [],
+      judges: [],
+    };
+    expect(parseJudging(base)?.totals).toBeUndefined();
+    expect(parseJudging({ ...base, totals: [{ idea_id: "a", average: 7.6, judges_scored: 2, rank: 1 }] })?.totals).toHaveLength(1);
+    expect(parseJudging({ ...base, totals: [{ idea_id: "a" }] })).toBeNull();
   });
 });

@@ -10,12 +10,18 @@ export type Criterion = { id: string; name: string; description: string | null; 
 export type JudgingIdea = { id: string; submitter_name: string; title: string; description: string; created_at: string };
 export type Score = { idea_id: string; criterion_id: string; judge_id: string; score: number };
 export type JudgeInvite = { id: string; email: string };
+// The database's combined result for one idea: the average of the judges' totals, how many judges
+// finished scoring it, and its rank. Everyone who can see the idea gets this, but never the
+// individual scores of other judges.
+export type IdeaTotal = { idea_id: string; average: number; judges_scored: number; rank: number };
 export type JudgingData = {
   role: "owner" | "judge";
   challenge: { id: string; title: string; status: string };
   criteria: Criterion[];
   ideas: JudgingIdea[];
   scores: Score[];
+  // Missing until the "public totals" database step has been run.
+  totals?: IdeaTotal[];
   judges: JudgeInvite[];
 };
 
@@ -37,6 +43,9 @@ const dataSchema = z.object({
   scores: z.array(
     z.object({ idea_id: z.string(), criterion_id: z.string(), judge_id: z.string(), score: z.number() }),
   ),
+  totals: z
+    .array(z.object({ idea_id: z.string(), average: z.number(), judges_scored: z.number(), rank: z.number() }))
+    .optional(),
   judges: z.array(z.object({ id: z.string(), email: z.string() })),
 });
 
@@ -127,6 +136,28 @@ export function rankIdeas(ideas: JudgingIdea[], criteria: Criterion[], scores: S
   });
   for (const r of unscored) ranked.push({ ...r, rank: null });
   return ranked;
+}
+
+// The same list as rankIdeas, but built from the database's totals, so judges (who only receive
+// their own scores) see the same combined ranking as the owner. Ideas without a total go last.
+export function rankFromTotals(ideas: JudgingIdea[], totals: IdeaTotal[]): RankedIdea[] {
+  const byId = new Map(totals.map((t) => [t.idea_id, t]));
+  const scored = ideas
+    .filter((i) => byId.has(i.id))
+    .sort(
+      (a, b) =>
+        (byId.get(a.id)?.rank ?? 0) - (byId.get(b.id)?.rank ?? 0) || a.created_at.localeCompare(b.created_at),
+    );
+  const unscored = ideas
+    .filter((i) => !byId.has(i.id))
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
+  return [
+    ...scored.map((idea) => {
+      const t = byId.get(idea.id) as IdeaTotal;
+      return { idea, rank: t.rank, average: t.average, judgesScored: t.judges_scored };
+    }),
+    ...unscored.map((idea) => ({ idea, rank: null, average: null, judgesScored: 0 })),
+  ];
 }
 
 // The current judge's own saved score for each criterion of one idea (for the form).
