@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { signOut } from "@/app/login/actions";
 import { APP_NAME } from "@/lib/config";
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -73,14 +72,6 @@ async function DashboardContent({
           </h1>
           <p className="mt-1 text-sm text-zinc-800">Signed in as {data.user.email}</p>
         </div>
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="rounded-lg border-2 border-flow-ink bg-white px-4 py-2 text-sm font-medium text-flow-ink transition-colors hover:bg-flow-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
-          >
-            Sign out
-          </button>
-        </form>
       </header>
 
       {saved || deleted ? (
