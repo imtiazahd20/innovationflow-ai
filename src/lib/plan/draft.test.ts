@@ -43,7 +43,8 @@ describe("draftPlan", () => {
 
   it("produces a plan that passes validation and uses the challenge text", () => {
     const plan = draftPlan(basics, "2026-11-01", fmt);
-    expect(plan.brief).toContain("# Cut delivery delays");
+    expect(plan.brief.startsWith("Cut delivery delays")).toBe(true);
+    expect(plan.brief).toContain("THE PROBLEM");
     expect(plan.brief).toContain("Late deliveries are costing us customers.");
     expect(plan.brief).toContain("D(2026-12-01)");
     expect(parsePlan(plan).ok).toBe(true);

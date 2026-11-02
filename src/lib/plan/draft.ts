@@ -57,21 +57,21 @@ export function draftPhases(deadline: string, today: string): PhaseInput[] {
 
 export function draftBrief(c: ChallengeBasics, formatDeadline: (iso: string) => string): string {
   return [
-    `# ${c.title}`,
+    c.title,
     "",
-    "## The problem",
+    "THE PROBLEM",
     c.business_problem,
     "",
-    "## What we want to achieve",
+    "WHAT WE WANT TO ACHIEVE",
     c.objectives,
     "",
-    "## Who should take part",
+    "WHO SHOULD TAKE PART",
     c.target_participants,
     "",
-    "## What to submit",
+    "WHAT TO SUBMIT",
     "A short proposal that explains your idea, why it solves the problem above, and how it could be put into practice.",
     "",
-    "## Deadline",
+    "DEADLINE",
     `Submissions close on ${formatDeadline(c.deadline)}.`,
   ].join("\n");
 }
