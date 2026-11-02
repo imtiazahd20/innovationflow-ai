@@ -23,10 +23,11 @@ function addDays(value: string, days: number): string {
 }
 
 export const DEFAULT_CRITERIA: CriterionInput[] = [
-  { name: "Impact", description: "How much the idea would improve the problem described in the challenge.", weight: 30 },
-  { name: "Feasibility", description: "Whether the idea can realistically be built and run with the time and resources available.", weight: 25 },
-  { name: "Creativity", description: "How fresh and original the approach is.", weight: 20 },
+  { name: "Impact", description: "How much the idea would improve the problem described in the challenge.", weight: 25 },
+  { name: "Feasibility", description: "Whether the idea can realistically be built and run with the time and resources available.", weight: 20 },
+  { name: "Creativity", description: "How fresh and original the approach is.", weight: 15 },
   { name: "Business value", description: "The likely benefit to the organisation compared with the cost and effort.", weight: 15 },
+  { name: "Scalability", description: "Whether the idea can grow beyond a first pilot to more teams, customers or markets.", weight: 15 },
   { name: "Clarity of pitch", description: "How clearly the team explains the problem, the idea and the next steps.", weight: 10 },
 ];
 

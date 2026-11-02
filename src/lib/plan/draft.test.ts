@@ -53,6 +53,6 @@ describe("draftPlan", () => {
   it("returns fresh copies so editing a draft can't change the defaults", () => {
     const a = draftPlan(basics, "2026-11-01", fmt);
     a.criteria[0].weight = 1;
-    expect(DEFAULT_CRITERIA[0].weight).toBe(30);
+    expect(DEFAULT_CRITERIA[0].weight).toBe(25);
   });
 });
