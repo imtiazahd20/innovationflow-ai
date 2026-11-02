@@ -57,6 +57,9 @@ async function DashboardContent({
     .select("id, title, deadline, status")
     .order("created_at", { ascending: false });
   const challenges = rows ?? [];
+  // Challenges where someone invited me to judge (answered by a database function).
+  const { data: judgeRows } = await supabase.rpc("my_judging_challenges");
+  const judging = Array.isArray(judgeRows) ? (judgeRows as { id: string; title: string; deadline: string }[]) : [];
   const loadFailed = Boolean(loadError);
   if (loadError) console.error("load challenges failed", loadError.code);
 
@@ -84,7 +87,7 @@ async function DashboardContent({
         <p role="alert" className="rounded-lg border-2 border-flow-ink bg-flow-red px-4 py-3 text-sm text-white">
           We couldn&apos;t load your challenges. Reload the page to try again.
         </p>
-      ) : challenges.length === 0 ? (
+      ) : challenges.length === 0 && judging.length === 0 ? (
         <section className="flex flex-col items-center gap-3 rounded-xl border-4 border-dashed border-flow-ink bg-white px-6 py-16 text-center">
           <h2 className="font-display text-lg font-black uppercase text-flow-ink">No challenges yet</h2>
           <p className="max-w-md text-sm leading-6 text-zinc-800">
@@ -92,7 +95,9 @@ async function DashboardContent({
           </p>
           <NewChallengeLink />
         </section>
-      ) : (
+      ) : null}
+
+      {!loadFailed && challenges.length > 0 ? (
         <section aria-labelledby="challenges-heading" className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
             <h2 id="challenges-heading" className="font-display text-lg font-black uppercase text-flow-ink">
@@ -119,7 +124,33 @@ async function DashboardContent({
             ))}
           </ul>
         </section>
-      )}
+      ) : null}
+
+      {judging.length > 0 ? (
+        <section aria-labelledby="judging-heading" className="flex flex-col gap-4">
+          <h2 id="judging-heading" className="font-display text-lg font-black uppercase text-flow-ink">
+            Challenges you judge
+          </h2>
+          <ul className="flex flex-col gap-3">
+            {judging.map((c) => (
+              <li key={c.id}>
+                <Link
+                  href={`/dashboard/challenges/${c.id}/judging`}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-flow-ink bg-white p-5 transition-colors hover:bg-flow-yellow/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
+                >
+                  <div className="min-w-0">
+                    <h3 className="truncate text-base font-bold text-flow-ink">{c.title}</h3>
+                    <p className="mt-1 text-sm text-zinc-800">Deadline {formatDate(c.deadline)}</p>
+                  </div>
+                  <span className="rounded-full border-2 border-flow-ink bg-flow-pink px-3 py-1 text-xs font-semibold text-flow-ink">
+                    Score ideas
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </>
   );
 }
