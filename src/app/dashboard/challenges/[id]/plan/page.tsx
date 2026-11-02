@@ -19,9 +19,9 @@ export default function PlanPage({ params }: Props) {
         <Suspense fallback={<span className="h-5" />}>
           <BackLink params={params} />
         </Suspense>
-        <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">Brief, criteria and timeline</h1>
+        <h1 className="font-display text-3xl font-black uppercase tracking-tight text-flow-ink">Brief, criteria and timeline</h1>
       </header>
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-zinc-100" aria-hidden />}>
+      <Suspense fallback={<div className="h-96 animate-pulse rounded-xl border-2 border-flow-ink bg-flow-yellow" aria-hidden />}>
         <PlanLoader params={params} />
       </Suspense>
     </main>
@@ -33,7 +33,7 @@ async function BackLink({ params }: Props) {
   return (
     <Link
       href={isChallengeId(id) ? `/dashboard/challenges/${id}` : "/dashboard"}
-      className="text-sm font-medium text-teal-700 hover:underline"
+      className="text-sm font-medium text-flow-blue hover:underline"
     >
       ← Back to challenge
     </Link>
@@ -47,7 +47,7 @@ async function PlanLoader({ params }: Props) {
   const supabase = await createClient();
   if (!supabase) {
     return (
-      <p className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
+      <p className="rounded-xl border-2 border-flow-ink bg-flow-yellow p-5 text-flow-ink">
         The database connection hasn&apos;t been set up yet.
       </p>
     );
@@ -63,7 +63,7 @@ async function PlanLoader({ params }: Props) {
   if (error) {
     console.error("load plan failed", error.code);
     return (
-      <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-5 text-red-800">
+      <p role="alert" className="rounded-xl border-2 border-flow-ink bg-flow-red p-5 text-white">
         We couldn&apos;t load this challenge. Reload the page to try again.
       </p>
     );
@@ -77,7 +77,7 @@ async function PlanLoader({ params }: Props) {
   if (criteria.error || phases.error) {
     console.error("load plan rows failed", criteria.error?.code, phases.error?.code);
     return (
-      <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-5 text-red-800">
+      <p role="alert" className="rounded-xl border-2 border-flow-ink bg-flow-red p-5 text-white">
         We couldn&apos;t load the plan. Reload the page to try again.
       </p>
     );
