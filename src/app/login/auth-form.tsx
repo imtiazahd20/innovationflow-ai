@@ -15,7 +15,7 @@ function SubmitButton({ idle, busy }: { idle: string; busy: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+      className="rounded-lg border-2 border-flow-ink bg-flow-yellow shadow-[3px_3px_0_0_#0d0d0d] px-4 py-2.5 text-sm font-black uppercase text-flow-ink transition-colors hover:bg-flow-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? busy : idle}
     </button>
@@ -42,7 +42,7 @@ function Field({
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-zinc-800">
+      <label htmlFor={id} className="text-sm font-medium text-flow-ink">
         {label}
       </label>
       <input
@@ -53,14 +53,14 @@ function Field({
         defaultValue={defaultValue}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className="rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-teal-700 aria-[invalid=true]:border-red-600"
+        className="rounded-lg border-2 border-flow-ink bg-white px-3 py-2.5 text-sm text-flow-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-flow-ink aria-[invalid=true]:border-flow-red"
       />
       {error ? (
         <p id={`${id}-error`} className="text-sm text-red-700">
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="text-sm text-zinc-500">
+        <p id={`${id}-hint`} className="text-sm text-zinc-700">
           {hint}
         </p>
       ) : null}
@@ -74,13 +74,13 @@ function Messages({ state }: { state: AuthFormState }) {
       {state.error ? (
         <p
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+          className="rounded-lg border-2 border-flow-ink bg-flow-red px-3 py-2 text-sm text-white"
         >
           {state.error}
         </p>
       ) : null}
       {state.notice ? (
-        <p className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-900">
+        <p className="rounded-lg border-2 border-flow-ink bg-flow-yellow px-3 py-2 text-sm text-flow-ink">
           {state.notice}
         </p>
       ) : null}
@@ -99,13 +99,13 @@ export function AuthForm() {
   const state = isSignIn ? signInState : signUpState;
 
   const tabClass = (active: boolean) =>
-    `flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-      active ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-600 hover:text-zinc-900"
+    `flex-1 rounded-md px-3 py-2 text-sm font-black uppercase transition-colors ${
+      active ? "bg-flow-ink text-flow-yellow" : "text-flow-ink hover:bg-white/60"
     }`;
 
   return (
     <div className="flex flex-col gap-5">
-      <div role="tablist" aria-label="Sign in or create an account" className="flex gap-1 rounded-lg bg-zinc-100 p-1">
+      <div role="tablist" aria-label="Sign in or create an account" className="flex gap-1 rounded-lg border-2 border-flow-ink bg-flow-yellow p-1">
         <button type="button" role="tab" aria-selected={isSignIn} onClick={() => setMode("signin")} className={tabClass(isSignIn)}>
           Sign in
         </button>
@@ -115,7 +115,7 @@ export function AuthForm() {
       </div>
 
       {confirmationFailed ? (
-        <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+        <p role="alert" className="rounded-lg border-2 border-flow-ink bg-flow-red px-3 py-2 text-sm text-white">
           That confirmation link didn&apos;t work. It may have expired. Sign in, or create your account again to get a new link.
         </p>
       ) : null}
