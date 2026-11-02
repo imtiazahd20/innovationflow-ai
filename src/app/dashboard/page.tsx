@@ -17,7 +17,7 @@ export default function DashboardPage({
 }) {
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-10 px-6 py-12">
-      <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-zinc-100" aria-hidden />}>
+      <Suspense fallback={<div className="h-64 animate-pulse rounded-xl border-2 border-flow-ink bg-flow-yellow" aria-hidden />}>
         <DashboardContent searchParams={searchParams} />
       </Suspense>
     </main>
@@ -33,13 +33,13 @@ async function DashboardContent({
 
   if (!supabase) {
     return (
-      <section className="rounded-xl border border-amber-200 bg-amber-50 p-6">
-        <h1 className="text-xl font-semibold text-amber-950">Database not connected yet</h1>
-        <p className="mt-2 text-amber-900">
+      <section className="rounded-xl border-2 border-flow-ink bg-flow-yellow p-6">
+        <h1 className="font-display text-xl font-black uppercase text-flow-ink">Database not connected yet</h1>
+        <p className="mt-2 text-flow-ink">
           The dashboard needs the Supabase connection settings. Once they are added, sign in
           again and your challenges will appear here.
         </p>
-        <Link href="/" className="mt-4 inline-block text-sm font-medium text-amber-950 underline">
+        <Link href="/" className="mt-4 inline-block text-sm font-medium text-flow-ink underline">
           Back to home
         </Link>
       </section>
@@ -65,18 +65,18 @@ async function DashboardContent({
     <>
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">
+          <p className="text-sm font-semibold uppercase tracking-widest text-flow-red">
             Innovation Sprint Planner
           </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">
+          <h1 className="font-display text-3xl font-black uppercase tracking-tight text-flow-ink">
             Your challenges
           </h1>
-          <p className="mt-1 text-sm text-zinc-600">Signed in as {data.user.email}</p>
+          <p className="mt-1 text-sm text-zinc-800">Signed in as {data.user.email}</p>
         </div>
         <form action={signOut}>
           <button
             type="submit"
-            className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 transition-colors hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            className="rounded-lg border-2 border-flow-ink bg-white px-4 py-2 text-sm font-medium text-flow-ink transition-colors hover:bg-flow-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
           >
             Sign out
           </button>
@@ -84,19 +84,19 @@ async function DashboardContent({
       </header>
 
       {saved || deleted ? (
-        <p role="status" className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900">
+        <p role="status" className="rounded-lg border-2 border-flow-ink bg-flow-yellow px-4 py-3 text-sm text-flow-ink">
           {deleted ? "Challenge deleted." : "Challenge saved."}
         </p>
       ) : null}
 
       {loadFailed ? (
-        <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p role="alert" className="rounded-lg border-2 border-flow-ink bg-flow-red px-4 py-3 text-sm text-white">
           We couldn&apos;t load your challenges. Reload the page to try again.
         </p>
       ) : challenges.length === 0 ? (
-        <section className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-16 text-center">
-          <h2 className="text-lg font-semibold text-zinc-900">No challenges yet</h2>
-          <p className="max-w-md text-sm leading-6 text-zinc-600">
+        <section className="flex flex-col items-center gap-3 rounded-xl border-4 border-dashed border-flow-ink bg-white px-6 py-16 text-center">
+          <h2 className="font-display text-lg font-black uppercase text-flow-ink">No challenges yet</h2>
+          <p className="max-w-md text-sm leading-6 text-zinc-800">
             Create your first challenge to start planning an innovation sprint.
           </p>
           <NewChallengeLink />
@@ -104,7 +104,7 @@ async function DashboardContent({
       ) : (
         <section aria-labelledby="challenges-heading" className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
-            <h2 id="challenges-heading" className="text-lg font-semibold text-zinc-900">
+            <h2 id="challenges-heading" className="font-display text-lg font-black uppercase text-flow-ink">
               {challenges.length} {challenges.length === 1 ? "challenge" : "challenges"}
             </h2>
             <NewChallengeLink />
@@ -114,13 +114,13 @@ async function DashboardContent({
               <li key={challenge.id}>
                 <Link
                   href={`/dashboard/challenges/${challenge.id}`}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white p-5 transition-colors hover:border-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-flow-ink bg-white p-5 transition-colors hover:bg-flow-yellow/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
                 >
                   <div className="min-w-0">
-                    <h3 className="truncate text-base font-semibold text-zinc-900">{challenge.title}</h3>
-                    <p className="mt-1 text-sm text-zinc-600">Deadline {formatDate(challenge.deadline)}</p>
+                    <h3 className="truncate text-base font-bold text-flow-ink">{challenge.title}</h3>
+                    <p className="mt-1 text-sm text-zinc-800">Deadline {formatDate(challenge.deadline)}</p>
                   </div>
-                  <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold capitalize text-zinc-700">
+                  <span className="rounded-full border-2 border-flow-ink bg-flow-yellow px-3 py-1 text-xs font-semibold capitalize text-flow-ink">
                     {challenge.status}
                   </span>
                 </Link>
@@ -137,7 +137,7 @@ function NewChallengeLink() {
   return (
     <Link
       href="/dashboard/challenges/new"
-      className="inline-block rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+      className="inline-block rounded-lg border-2 border-flow-ink bg-flow-yellow shadow-[3px_3px_0_0_#0d0d0d] px-4 py-2 text-sm font-black uppercase text-flow-ink transition-colors hover:bg-flow-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
     >
       New challenge
     </Link>
