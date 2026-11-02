@@ -225,6 +225,18 @@ async function ChallengeDetail({ params, searchParams }: Props) {
         >
           Edit
         </Link>
+        <Link
+          href={`/dashboard/challenges/${challenge.id}/discuss`}
+          className="rounded-lg border-2 border-flow-ink bg-white px-4 py-2 text-sm font-black uppercase text-flow-ink transition-colors hover:bg-flow-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
+        >
+          Discussion
+        </Link>
+        <Link
+          href={`/dashboard/challenges/${challenge.id}/judging`}
+          className="rounded-lg border-2 border-flow-ink bg-white px-4 py-2 text-sm font-black uppercase text-flow-ink transition-colors hover:bg-flow-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
+        >
+          Judging &amp; ranking
+        </Link>
         <DeleteButton action={deleteChallenge.bind(null, challenge.id)} />
       </div>
     </>
