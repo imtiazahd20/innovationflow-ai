@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { ChallengeTabs } from "../challenge-tabs";
 import { notFound, redirect } from "next/navigation";
 import { Dropdown } from "@/components/dropdown";
 import { APP_NAME } from "@/lib/config";
@@ -68,6 +69,7 @@ async function Judging({ params }: Props) {
         ← {isOwner ? "Back to the challenge" : "Your dashboard"}
       </Link>
 
+      <ChallengeTabs id={challenge.id} current="judging" canEdit={isOwner} />
       <header className="flex flex-col gap-2">
         <p className="text-sm font-black uppercase tracking-widest text-flow-red">Judging</p>
         <h1 className="font-display text-3xl font-black uppercase tracking-tight text-flow-ink">{challenge.title}</h1>
