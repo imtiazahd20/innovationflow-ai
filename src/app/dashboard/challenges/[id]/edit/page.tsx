@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { APP_NAME } from "@/lib/config";
 import { isChallengeId } from "@/lib/challenges/ids";
 import { createClient } from "@/lib/supabase/server";
 import { ChallengeForm } from "../../new/challenge-form";
+import { ChallengeTabs } from "../challenge-tabs";
 import { updateChallenge } from "../actions";
 
 export const metadata = { title: `Edit challenge · ${APP_NAME}` };
@@ -29,14 +29,8 @@ export default function EditChallengePage({ params }: Props) {
 
 async function BackLink({ params }: Props) {
   const { id } = await params;
-  return (
-    <Link
-      href={isChallengeId(id) ? `/dashboard/challenges/${id}` : "/dashboard"}
-      className="text-sm font-medium text-flow-blue hover:underline"
-    >
-      ← Back to challenge
-    </Link>
-  );
+  if (!isChallengeId(id)) return null;
+  return <ChallengeTabs id={id} current="edit" canEdit />;
 }
 
 async function EditForm({ params }: Props) {
