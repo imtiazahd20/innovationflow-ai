@@ -154,7 +154,7 @@ export default function Home() {
       {/* ------------------------------------------------------- Impact */}
       <section aria-labelledby="impact-heading" className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6">
         <p className="text-sm font-black uppercase tracking-widest text-flow-red">The positive impact</p>
-        <h2 id="impact-heading" className="mt-1 max-w-3xl font-display text-3xl font-black uppercase tracking-tight sm:text-5xl">
+        <h2 id="impact-heading" className="mt-1 max-w-3xl font-display text-3xl font-black tracking-tight sm:text-5xl">
           What {APP_NAME} is built to change
         </h2>
         <ul className="mt-10 grid gap-6 sm:grid-cols-2">
