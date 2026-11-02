@@ -73,6 +73,7 @@ async function EditForm({ params }: Props) {
 
   return (
     <ChallengeForm
+      key={JSON.stringify(data)} // fresh form whenever the saved data changes (see plan page)
       action={updateChallenge.bind(null, id)}
       initialValues={data}
       submitLabel="Save changes"
