@@ -65,55 +65,54 @@ async function PublicChallenge({ params }: Props) {
         <p className="text-sm text-zinc-800">Deadline {formatDate(challenge.deadline)}</p>
       </header>
 
-      {challenge.brief ? (
-        <section className="rounded-2xl border-4 border-flow-ink bg-white p-6 shadow-[6px_6px_0_0_#0d0d0d]">
-          <h2 className="font-display text-xl font-black uppercase text-flow-ink">Brief</h2>
-          <p className="mt-3 whitespace-pre-line text-flow-ink">{challenge.brief}</p>
-        </section>
-      ) : null}
+      {/* Each part is a dropdown that starts closed, so visitors see only the titles and open
+          what they want to read. <details> is built into browsers: no JavaScript needed. */}
+      <div className="flex flex-col gap-4">
+        {challenge.brief ? (
+          <Dropdown title="Brief">
+            <p className="whitespace-pre-line text-flow-ink">{challenge.brief}</p>
+          </Dropdown>
+        ) : null}
 
-      <dl className="flex flex-col gap-6">
-        <Detail label="Business problem" value={challenge.business_problem} />
-        <Detail label="Objectives" value={challenge.objectives} />
-        <Detail label="Who can take part" value={challenge.target_participants} />
-      </dl>
+        <Dropdown title="Business problem & Objectives">
+          <dl className="flex flex-col gap-6">
+            <Detail label="Business problem" value={challenge.business_problem} />
+            <Detail label="Objectives" value={challenge.objectives} />
+            <Detail label="Who can take part" value={challenge.target_participants} />
+          </dl>
+        </Dropdown>
 
-      {challenge.criteria.length > 0 ? (
-        <section aria-labelledby="criteria-heading" className="flex flex-col gap-3 border-t-4 border-flow-ink pt-6">
-          <h2 id="criteria-heading" className="font-display text-xl font-black uppercase text-flow-ink">
-            How entries are judged
-          </h2>
-          <ul className="flex flex-col gap-2">
-            {challenge.criteria.map((c, i) => (
-              <li key={i} className="rounded-lg border-2 border-flow-ink bg-white p-3">
-                <p className="font-medium text-flow-ink">
-                  {c.name} <span className="text-zinc-700">· {c.weight}%</span>
-                </p>
-                {c.description ? <p className="mt-1 text-sm text-zinc-800">{c.description}</p> : null}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+        {challenge.criteria.length > 0 ? (
+          <Dropdown title="How entries are judged">
+            <ul className="flex flex-col gap-2">
+              {challenge.criteria.map((c, i) => (
+                <li key={i} className="rounded-lg border-2 border-flow-ink bg-white p-3">
+                  <p className="font-medium text-flow-ink">
+                    {c.name} <span className="text-zinc-700">· {c.weight}%</span>
+                  </p>
+                  {c.description ? <p className="mt-1 text-sm text-zinc-800">{c.description}</p> : null}
+                </li>
+              ))}
+            </ul>
+          </Dropdown>
+        ) : null}
 
-      {challenge.phases.length > 0 ? (
-        <section aria-labelledby="timeline-heading" className="flex flex-col gap-3 border-t-4 border-flow-ink pt-6">
-          <h2 id="timeline-heading" className="font-display text-xl font-black uppercase text-flow-ink">
-            Timeline
-          </h2>
-          <ol className="flex flex-col gap-2">
-            {challenge.phases.map((p, i) => (
-              <li key={i} className="rounded-lg border-2 border-flow-ink bg-white p-3">
-                <p className="font-medium text-flow-ink">{p.name}</p>
-                <p className="text-sm text-zinc-800">
-                  {formatDate(p.starts_on)} – {formatDate(p.ends_on)}
-                </p>
-                {p.description ? <p className="mt-1 text-sm text-zinc-800">{p.description}</p> : null}
-              </li>
-            ))}
-          </ol>
-        </section>
-      ) : null}
+        {challenge.phases.length > 0 ? (
+          <Dropdown title="Timeline">
+            <ol className="flex flex-col gap-2">
+              {challenge.phases.map((p, i) => (
+                <li key={i} className="rounded-lg border-2 border-flow-ink bg-white p-3">
+                  <p className="font-medium text-flow-ink">{p.name}</p>
+                  <p className="text-sm text-zinc-800">
+                    {formatDate(p.starts_on)} – {formatDate(p.ends_on)}
+                  </p>
+                  {p.description ? <p className="mt-1 text-sm text-zinc-800">{p.description}</p> : null}
+                </li>
+              ))}
+            </ol>
+          </Dropdown>
+        ) : null}
+      </div>
 
       <section aria-labelledby="idea-heading" className="flex flex-col gap-4 border-t-4 border-flow-ink pt-6">
         <h2 id="idea-heading" className="font-display text-xl font-black uppercase text-flow-ink">
@@ -145,5 +144,29 @@ function Detail({ label, value }: { label: string; value: string }) {
       <dt className="text-sm font-medium text-zinc-700">{label}</dt>
       <dd className="whitespace-pre-line text-flow-ink">{value}</dd>
     </div>
+  );
+}
+
+// A closed-by-default section: only the title shows until the visitor clicks it.
+function Dropdown({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <details className="group rounded-2xl border-4 border-flow-ink bg-white shadow-[4px_4px_0_0_#0d0d0d]">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-xl px-5 py-4 font-display text-lg font-black uppercase text-flow-ink hover:bg-flow-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink group-open:rounded-b-none group-open:bg-flow-yellow [&::-webkit-details-marker]:hidden">
+        {title}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="h-6 w-6 shrink-0 transition-transform group-open:rotate-180"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M5 9l7 7 7-7" />
+        </svg>
+      </summary>
+      <div className="border-t-4 border-flow-ink p-5">{children}</div>
+    </details>
   );
 }
