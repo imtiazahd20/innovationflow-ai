@@ -5,6 +5,8 @@ export type ChallengeFormState = {
   error?: string;
   fieldErrors?: ChallengeFieldErrors;
   values?: Partial<Record<ChallengeField, string>>;
+  // The workspace picked on the "new challenge" form, kept after a failed try.
+  organizationId?: string;
 };
 
 // A challenge as stored in the database (the columns the pages need).
