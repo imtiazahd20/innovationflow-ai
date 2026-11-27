@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { APP_NAME } from "@/lib/config";
+import { canManageChallenges } from "@/lib/orgs/roles";
+import { prepareWorkspaces } from "@/lib/orgs/server";
 import { createClient } from "@/lib/supabase/server";
 import { todayISO } from "@/lib/validation/challenge";
 import { createChallenge } from "./actions";
@@ -44,5 +46,23 @@ async function FormGate() {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) redirect("/login");
 
-  return <ChallengeForm action={createChallenge} minDate={todayISO()} />;
+  const workspaces = ((await prepareWorkspaces(supabase, data.user.id)) ?? []).filter((w) =>
+    canManageChallenges(w.roles),
+  );
+  if (workspaces.length === 0) {
+    return (
+      <p className="rounded-xl border-2 border-flow-ink bg-flow-yellow p-5 text-flow-ink">
+        Only admins and organisers can create challenges, and you aren&apos;t one in any workspace yet.
+        Ask a workspace admin to make you an organiser.
+      </p>
+    );
+  }
+
+  return (
+    <ChallengeForm
+      action={createChallenge}
+      minDate={todayISO()}
+      workspaces={workspaces.map((w) => ({ id: w.id, name: w.name }))}
+    />
+  );
 }

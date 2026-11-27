@@ -63,6 +63,7 @@ export function ChallengeForm({
   submitLabel = "Save challenge",
   busyLabel = "Saving…",
   cancelHref = "/dashboard",
+  workspaces,
 }: {
   action: ChallengeFormAction;
   initialValues?: Partial<Record<ChallengeField, string>>;
@@ -70,6 +71,8 @@ export function ChallengeForm({
   submitLabel?: string;
   busyLabel?: string;
   cancelHref?: string;
+  // Only on the "new challenge" form: the workspaces this person may create challenges in.
+  workspaces?: { id: string; name: string }[];
 }) {
   const initialState: ChallengeFormState = { values: initialValues };
   const [state, action] = useActionState(submitAction, initialState);
@@ -85,6 +88,29 @@ export function ChallengeForm({
 
   return (
     <form action={action} noValidate className="flex flex-col gap-6 rounded-2xl border-4 border-flow-ink bg-white p-6 shadow-[6px_6px_0_0_#0d0d0d]">
+      {workspaces && workspaces.length > 1 ? (
+        <FieldShell
+          id="organization_id"
+          label="Workspace"
+          hint="Everyone who is an admin or organiser in this workspace can manage the challenge."
+        >
+          <select
+            id="organization_id"
+            name="organization_id"
+            defaultValue={state.organizationId ?? workspaces[0].id}
+            aria-describedby="organization_id-hint"
+            className={inputClass}
+          >
+            {workspaces.map((w) => (
+              <option key={w.id} value={w.id}>
+                {w.name}
+              </option>
+            ))}
+          </select>
+        </FieldShell>
+      ) : workspaces && workspaces.length === 1 ? (
+        <input type="hidden" name="organization_id" value={workspaces[0].id} />
+      ) : null}
       <FieldShell id="title" label="Challenge title" hint={titleHint} error={errors.title}>
         <input
           id="title"
