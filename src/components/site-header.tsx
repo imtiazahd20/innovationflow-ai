@@ -48,9 +48,16 @@ export function SiteHeader() {
         </Link>
         <ul className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {/* On very narrow phones the logo already goes Home, so this button makes room. */}
-          <li className="hidden min-[480px]:block">
+          <li className="hidden sm:block">
             <Link href="/" className={link}>
               Home
+            </Link>
+          </li>
+          {/* From 480px wide; narrower phones keep room for the full logo and reach the roadmap
+              from the dashboard instead. */}
+          <li className="hidden min-[480px]:block">
+            <Link href="/roadmap" className={link}>
+              Roadmap
             </Link>
           </li>
           <li>
