@@ -32,24 +32,42 @@ flowchart LR
 | `supabase/tests` | SQL security checks |
 | `docs` | These documents |
 
-## 3. Proposed: organisations and roles (Phase 3, needs approval)
+## 3. Organisations and roles (Phase 3, applied 27 Nov 2026)
 
 **Why:** every later feature belongs to an organisation and depends on who the person is there.
 
-**What changes (additive only):**
+**What changed (additive only):**
 
-1. New `organizations` and `organization_members (organization_id, user_id, role)` tables.
-   Roles: `admin`, `organiser`, `judge`, `mentor`, `participant`, `project_owner`. A person can hold
-   several roles. Platform super admins sit in a separate `platform_admins` table.
-2. New nullable `organization_id` on `challenges`.
-3. Backfill: for each existing challenge owner, create one workspace named after them, make them
-   `admin`, and set `organization_id` on their challenges. Then make the column required.
-4. Security rules for challenges change from "owner only" to "members of the challenge's
-   organisation, by role" (admins and organisers manage; judges and mentors read what they are
-   assigned). The existing owner keeps full access, so nothing changes for current users.
-5. Existing judge invitations by email keep working unchanged.
+1. New `organizations`, `organization_members (organization_id, user_id, role)` and
+   `organization_invites` tables. Roles: `admin`, `organiser`, `judge`, `mentor`, `participant`,
+   `project_owner`; a person can hold several. (A `platform_admins` table for the platform
+   super-admin is still to come.)
+2. New required `organization_id` on `challenges`, backfilled: each existing challenge owner got one
+   workspace named after them, as `admin`, containing their challenges.
+3. Security rules for challenges changed from "owner only" to "admins and organisers of the
+   challenge's workspace". A trigger files any challenge created without a workspace into the
+   creator's own, so older app code kept working during the deploy.
+4. Existing judge invitations by email keep working unchanged.
 
-**Rollback:** the old `owner_id` column stays, so the previous rules can be restored by one migration.
+**Rollback:** the old `owner_id` column stays, so the previous rules can be restored with
+`supabase/rollback/20261127000000_organizations_down.sql` (tested).
+
+**Decision made while building:** access comes from the organisation role, not from having created
+the challenge. Every existing owner became admin of their own workspace, so nothing changed for them,
+and removing someone from a workspace genuinely removes their access.
+
+### Role and permission matrix
+
+| Can… | Admin | Organiser | Judge | Mentor | Participant | Project owner | Challenge judge (invited by email) |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| See the workspace and its members | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| Rename the workspace, invite, remove roles | ✓ | – | – | – | – | – | – |
+| Create, edit, publish, delete challenges | ✓ | ✓ | – | – | – | – | – |
+| Read and delete ideas, manage challenge judges | ✓ | ✓ | – | – | – | – | – |
+| Score ideas and comment on that challenge | ✓ | ✓ | later | – | – | – | ✓ |
+| Mentor teams / submit as participant / run projects | – | – | – | later | later | later | – |
+
+"Later" roles are stored now; their screens arrive in Phases 4–6.
 
 ## 4. Proposed: AI layer (Phase 7, started)
 

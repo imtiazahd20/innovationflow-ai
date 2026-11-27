@@ -29,6 +29,7 @@ comments, validation shared between browser and server, security enforced in the
 | Feature | Where |
 |---|---|
 | Sign up / sign in / sign out, email confirmation, protected dashboard | `src/app/login`, `src/proxy.ts` |
+| Workspaces with roles; invite by email; rename; remove roles (Phase 3) | `src/app/dashboard/organizations`, migration `…organizations.sql` |
 | Create, edit, delete challenges (title, problem, objectives, participants, deadline) | `src/app/dashboard/challenges` |
 | Plan editor: brief, weighted judging criteria (must total 100), timeline phases | `…/[id]/plan` |
 | Draft the plan from a template | `src/lib/plan/draft.ts` |
