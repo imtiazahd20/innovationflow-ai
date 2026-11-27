@@ -35,6 +35,20 @@ npm run dev        # starts the app at http://localhost:3000
 Keys and passwords go in a file called `.env.local`, which Git ignores. Copy `.env.example`
 to `.env.local` and fill it in. Never paste keys into chat, code or commits.
 
+## AI drafting (free, Google Gemini)
+
+On a challenge's **Brief, criteria and timeline** page, **Draft with AI** asks Google Gemini to
+write the brief, judging criteria and timeline. The draft fills the editor; nothing is saved
+until you press **Save plan**.
+
+- Set `GEMINI_API_KEY` in `.env.local` (and in Vercel → Settings → Environment Variables for the
+  live site). Get a free key at https://aistudio.google.com/apikey. Without it the button is hidden
+  and **Draft from template** still works.
+- Free tier: Google limits requests per minute and per day, and may use what is sent to improve its
+  products. Only the challenge's title, problem, objectives, participants and deadline are sent.
+- The code checks the AI's answer: weights always add up to 100 and dates stay between today and
+  the deadline. Anything unusable falls back to the template. See `src/lib/plan/ai-draft.ts`.
+
 ## Milestones
 
 - [x] **0. Foundation:** project runs, tests pass, production build works
