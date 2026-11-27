@@ -33,19 +33,21 @@ export async function draftPlanWithAi(id: string): Promise<AiDraftResult> {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData.user) redirect("/login");
 
-  // Only the owner may use the AI on a challenge (judges and visitors can read some
-  // challenges, so we check the owner explicitly as well as relying on the database rules).
+  // Only the challenge's admins and organisers may use the AI on it. The database rules already
+  // limit what this query can see; the explicit check makes the rule plain here too.
+  const { data: canManage } = await supabase.rpc("can_manage_challenge", { p_challenge: id });
+  if (canManage !== true) return { ok: false, error: "This challenge no longer exists, or you can't manage it." };
+
   const { data: challenge, error } = await supabase
     .from("challenges")
     .select("title, business_problem, objectives, target_participants, deadline")
     .eq("id", id)
-    .eq("owner_id", userData.user.id)
     .maybeSingle();
   if (error) {
     console.error("ai draft load failed", error.code);
     return { ok: false, error: "We couldn't load this challenge. Please try again." };
   }
-  if (!challenge) return { ok: false, error: "This challenge no longer exists, or it isn't yours." };
+  if (!challenge) return { ok: false, error: "This challenge no longer exists, or you can't manage it." };
 
   const today = todayISO();
   const result = await generateJson({
