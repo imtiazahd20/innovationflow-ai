@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { draftPlan, type ChallengeBasics } from "@/lib/plan/draft";
 import { PLAN_LIMITS, totalWeight } from "@/lib/plan/schema";
 import { formatDate } from "@/lib/format";
 import type { PlanState } from "./actions";
+import type { AiDraftResult } from "./ai-actions";
 
 // While typing, every value is text. The weight is turned into a number when saving.
 type CriterionRow = { name: string; description: string; weight: string };
@@ -38,27 +39,58 @@ export function PlanEditor({
   basics,
   today,
   cancelHref,
+  aiDraft,
 }: {
   action: (previous: PlanState, formData: FormData) => Promise<PlanState>;
   initial: InitialPlan;
   basics: ChallengeBasics;
   today: string;
   cancelHref: string;
+  // Present only when AI drafting is switched on (a Gemini key is set on the server).
+  aiDraft?: () => Promise<AiDraftResult>;
 }) {
   const [state, action] = useActionState(saveAction, {} as PlanState);
   const [brief, setBrief] = useState(initial.brief);
   const [criteria, setCriteria] = useState<CriterionRow[]>(initial.criteria);
   const [phases, setPhases] = useState<PhaseRow[]>(initial.phases);
+  const [aiPending, startAi] = useTransition();
+  const [aiMessage, setAiMessage] = useState<{ kind: "error" | "note"; text: string } | null>(null);
 
   const hasContent = brief.trim() !== "" || criteria.length > 0 || phases.length > 0;
   const total = totalWeight(criteria.map((c) => ({ weight: c.weight.trim() === "" ? NaN : Number(c.weight) })));
 
-  function fillDraft() {
-    if (hasContent && !window.confirm("Replace what is on this page with a fresh draft?")) return;
-    const draft = draftPlan(basics, today, formatDate);
+  function applyDraft(draft: { brief: string; criteria: { name: string; description: string; weight: number }[]; phases: PhaseRow[] }) {
     setBrief(draft.brief);
     setCriteria(draft.criteria.map((c) => ({ ...c, weight: String(c.weight) })));
     setPhases(draft.phases);
+  }
+
+  function fillDraft() {
+    if (hasContent && !window.confirm("Replace what is on this page with a fresh draft?")) return;
+    setAiMessage(null);
+    applyDraft(draftPlan(basics, today, formatDate));
+  }
+
+  function fillAiDraft() {
+    if (!aiDraft) return;
+    if (hasContent && !window.confirm("Replace what is on this page with an AI draft?")) return;
+    setAiMessage(null);
+    startAi(async () => {
+      try {
+        const result = await aiDraft();
+        if (!result.ok) {
+          setAiMessage({ kind: "error", text: result.error });
+          return;
+        }
+        applyDraft(result.plan);
+        setAiMessage({
+          kind: "note",
+          text: result.note ?? "Draft ready. Read it through and change anything you like before saving.",
+        });
+      } catch {
+        setAiMessage({ kind: "error", text: "The AI service didn't respond. Please try again in a moment." });
+      }
+    });
   }
 
   const payload = JSON.stringify({
@@ -80,14 +112,44 @@ export function PlanEditor({
       <section className="flex flex-col gap-3 rounded-xl border-2 border-flow-ink bg-flow-yellow p-5">
         <h2 className="text-base font-bold text-flow-ink">Start with a draft</h2>
         <p className="text-sm text-flow-ink">
-          Fills the brief, criteria and timeline from your challenge details. It uses simple
-          templates (no AI), so read it through and change anything you like before saving.
+          {aiDraft
+            ? "Let AI write the brief, criteria and timeline from your challenge details, or start from a simple template. Either way, read it through and change anything you like before saving."
+            : "Fills the brief, criteria and timeline from your challenge details using simple templates. Read it through and change anything you like before saving."}
         </p>
-        <div>
-          <button type="button" onClick={fillDraft} className={smallButton}>
-            Draft for me
+        <div className="flex flex-wrap gap-2">
+          {aiDraft && (
+            <button
+              type="button"
+              onClick={fillAiDraft}
+              disabled={aiPending}
+              aria-busy={aiPending}
+              className="rounded-lg border-2 border-flow-ink bg-flow-ink px-3 py-1.5 text-sm font-bold text-white hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink disabled:cursor-wait disabled:opacity-70"
+            >
+              {aiPending ? "Writing your draft… (up to a minute)" : "✦ Draft with AI"}
+            </button>
+          )}
+          <button type="button" onClick={fillDraft} disabled={aiPending} className={`${smallButton} disabled:opacity-60`}>
+            {aiDraft ? "Draft from template" : "Draft for me"}
           </button>
         </div>
+        {aiMessage && (
+          <p
+            role={aiMessage.kind === "error" ? "alert" : "status"}
+            className={
+              aiMessage.kind === "error"
+                ? "rounded-lg border-2 border-flow-ink bg-white px-3 py-2 text-sm text-red-800"
+                : "rounded-lg border-2 border-flow-ink bg-white px-3 py-2 text-sm text-flow-ink"
+            }
+          >
+            {aiMessage.text}
+          </p>
+        )}
+        {aiDraft && (
+          <p className="text-xs text-flow-ink/80">
+            AI drafts use Google Gemini&apos;s free service, which may use what&apos;s sent to improve
+            Google&apos;s products. Only this challenge&apos;s title, problem, objectives, participants and deadline are sent.
+          </p>
+        )}
       </section>
 
       <section className="flex flex-col gap-2">

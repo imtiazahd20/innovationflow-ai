@@ -6,6 +6,8 @@ import { isChallengeId } from "@/lib/challenges/ids";
 import { createClient } from "@/lib/supabase/server";
 import { todayISO } from "@/lib/validation/challenge";
 import { savePlan } from "./actions";
+import { draftPlanWithAi } from "./ai-actions";
+import { isGeminiConfigured } from "@/lib/ai/gemini";
 import { PlanEditor } from "./plan-editor";
 
 export const metadata = { title: `Plan · ${APP_NAME}` };
@@ -94,6 +96,7 @@ async function PlanLoader({ params }: Props) {
       basics={basics}
       today={todayISO()}
       cancelHref={`/dashboard/challenges/${id}`}
+      aiDraft={isGeminiConfigured() ? draftPlanWithAi.bind(null, id) : undefined}
       initial={{
         brief: brief ?? "",
         criteria: (criteria.data ?? []).map((c) => ({
