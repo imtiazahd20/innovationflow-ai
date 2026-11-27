@@ -187,7 +187,7 @@ export default function RoadmapPage() {
         </h2>
         <ol className="mt-8 flex flex-col gap-6">
           {CHANGELOG.map((entry) => (
-            <li key={entry.date} className={`${card} rounded-2xl bg-white p-5`}>
+            <li key={`${entry.date}-${entry.title}`} className={`${card} rounded-2xl bg-white p-5`}>
               <p className="text-sm font-black uppercase tracking-wide text-flow-red">
                 <time dateTime={entry.date}>{formatDate(entry.date)}</time>
               </p>
