@@ -75,6 +75,12 @@ async function DashboardContent({
           </h1>
           <p className="mt-1 text-sm text-zinc-800">Signed in as {data.user.email}</p>
         </div>
+        <Link
+          href="/roadmap"
+          className="rounded-full border-2 border-flow-ink bg-white px-3 py-1 text-sm font-bold text-flow-ink transition-colors hover:bg-flow-ink hover:text-flow-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
+        >
+          See the roadmap →
+        </Link>
       </header>
 
       {saved || deleted ? (
