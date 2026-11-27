@@ -3,6 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { APP_NAME } from "@/lib/config";
 import { formatDate } from "@/lib/format";
+import { ROLE_LABELS, canManageChallenges, type Workspace } from "@/lib/orgs/roles";
+import { prepareWorkspaces } from "@/lib/orgs/server";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: `Dashboard · ${APP_NAME}` };
@@ -51,10 +53,16 @@ async function DashboardContent({
 
   const { saved, deleted } = await searchParams;
 
-  // Row Level Security means this only ever returns the signed-in person's own challenges.
+  // Claims any workspace invitations sent to this email, and gives a new person a workspace.
+  const workspaces = (await prepareWorkspaces(supabase, data.user.id)) ?? [];
+  const managed = workspaces.filter((w) => canManageChallenges(w.roles));
+  const workspaceName = new Map(workspaces.map((w) => [w.id, w.name]));
+
+  // Row Level Security means this only returns challenges in workspaces where this person is
+  // an admin or organiser.
   const { data: rows, error: loadError } = await supabase
     .from("challenges")
-    .select("id, title, deadline, status")
+    .select("id, title, deadline, status, organization_id")
     .order("created_at", { ascending: false });
   const challenges = rows ?? [];
   // Challenges where someone invited me to judge (answered by a database function).
@@ -83,6 +91,8 @@ async function DashboardContent({
         </Link>
       </header>
 
+      <WorkspaceList workspaces={workspaces} />
+
       {saved || deleted ? (
         <p role="status" className="rounded-lg border-2 border-flow-ink bg-flow-yellow px-4 py-3 text-sm text-flow-ink">
           {deleted ? "Challenge deleted." : "Challenge saved."}
@@ -97,9 +107,11 @@ async function DashboardContent({
         <section className="flex flex-col items-center gap-3 rounded-xl border-4 border-dashed border-flow-ink bg-white px-6 py-16 text-center">
           <h2 className="font-display text-lg font-black uppercase text-flow-ink">No challenges yet</h2>
           <p className="max-w-md text-sm leading-6 text-zinc-800">
-            Create your first challenge to start planning an innovation sprint.
+            {managed.length > 0
+              ? "Create your first challenge to start planning an innovation sprint."
+              : "You aren't an admin or organiser in any workspace yet, so there is nothing to manage here."}
           </p>
-          <NewChallengeLink />
+          {managed.length > 0 ? <NewChallengeLink /> : null}
         </section>
       ) : null}
 
@@ -109,7 +121,7 @@ async function DashboardContent({
             <h2 id="challenges-heading" className="font-display text-lg font-black uppercase text-flow-ink">
               {challenges.length} {challenges.length === 1 ? "challenge" : "challenges"}
             </h2>
-            <NewChallengeLink />
+            {managed.length > 0 ? <NewChallengeLink /> : null}
           </div>
           <ul className="flex flex-col gap-3">
             {challenges.map((challenge) => (
@@ -120,7 +132,12 @@ async function DashboardContent({
                 >
                   <div className="min-w-0">
                     <h3 className="truncate text-base font-bold text-flow-ink">{challenge.title}</h3>
-                    <p className="mt-1 text-sm text-zinc-800">Deadline {formatDate(challenge.deadline)}</p>
+                    <p className="mt-1 text-sm text-zinc-800">
+                      Deadline {formatDate(challenge.deadline)}
+                      {managed.length > 1 && workspaceName.get(challenge.organization_id)
+                        ? ` · ${workspaceName.get(challenge.organization_id)}`
+                        : ""}
+                    </p>
                   </div>
                   <span className="rounded-full border-2 border-flow-ink bg-flow-yellow px-3 py-1 text-xs font-semibold capitalize text-flow-ink">
                     {challenge.status}
@@ -158,6 +175,32 @@ async function DashboardContent({
         </section>
       ) : null}
     </>
+  );
+}
+
+// The workspaces this person belongs to, each linking to its members and settings.
+function WorkspaceList({ workspaces }: { workspaces: Workspace[] }) {
+  if (workspaces.length === 0) return null;
+  return (
+    <section aria-labelledby="workspaces-heading" className="flex flex-col gap-2">
+      <h2 id="workspaces-heading" className="text-sm font-black uppercase tracking-widest text-flow-ink">
+        {workspaces.length === 1 ? "Your workspace" : "Your workspaces"}
+      </h2>
+      <ul className="flex flex-wrap gap-2">
+        {workspaces.map((w) => (
+          <li key={w.id}>
+            <Link
+              href={`/dashboard/organizations/${w.id}`}
+              className="flex flex-wrap items-center gap-2 rounded-xl border-2 border-flow-ink bg-white px-3 py-2 text-sm text-flow-ink transition-colors hover:bg-flow-yellow/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
+            >
+              <span className="font-bold">{w.name}</span>
+              <span className="text-xs text-zinc-700">{w.roles.map((r) => ROLE_LABELS[r]).join(", ")}</span>
+              <span aria-hidden className="font-bold">→</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
