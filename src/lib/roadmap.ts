@@ -59,7 +59,7 @@ export const ROADMAP: RoadmapPhase[] = [
       { id: "arch-tech", title: "Technical architecture document", status: "done" },
       { id: "arch-db", title: "Database schema document (current and proposed)", status: "done" },
       { id: "arch-prd", title: "Product requirements document", status: "next" },
-      { id: "arch-roles", title: "Role and permission matrix", status: "next" },
+      { id: "arch-roles", title: "Role and permission matrix", status: "done" },
       { id: "arch-journeys", title: "User journeys for the five core workflows", status: "next" },
     ],
   },
@@ -71,10 +71,15 @@ export const ROADMAP: RoadmapPhase[] = [
     items: [
       { id: "core-auth", title: "Email and password sign-in with email confirmation", status: "done" },
       { id: "core-protected", title: "Protected dashboard and secure database rules", status: "done" },
-      { id: "core-orgs", title: "Organisations (workspaces), keeping all existing challenges", status: "next" },
-      { id: "core-roles", title: "Roles: admin, organiser, judge, mentor, participant, project owner", status: "next" },
-      { id: "core-invites", title: "Invite colleagues to an organisation", status: "planned" },
-      { id: "core-nav", title: "App navigation for the three modules", status: "planned" },
+      { id: "core-orgs", title: "Organisations (workspaces), keeping all existing challenges", status: "done" },
+      {
+        id: "core-roles",
+        title: "Roles: admin, organiser, judge, mentor, participant, project owner",
+        detail: "Admin and organiser are active; the other roles get their screens in later phases.",
+        status: "done",
+      },
+      { id: "core-invites", title: "Invite colleagues to an organisation", status: "done" },
+      { id: "core-nav", title: "App navigation for the three modules", status: "next" },
       { id: "core-org-dashboard", title: "Organisation dashboard", status: "planned" },
       { id: "core-notifications", title: "In-app notifications", status: "planned" },
       { id: "core-activity", title: "Activity log for important actions", status: "planned" },
@@ -233,6 +238,15 @@ export const ROADMAP: RoadmapPhase[] = [
 
 // Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    date: "2026-11-27",
+    title: "Workspaces and roles",
+    changes: [
+      "Every challenge now belongs to a workspace. Your existing challenges moved into your own workspace, unchanged.",
+      "Invite colleagues by email as admin, organiser, judge, mentor, participant or project owner.",
+      "Admins and organisers manage the workspace's challenges; removing someone removes their access.",
+    ],
+  },
   {
     date: "2026-11-27",
     title: "Roadmap, AI drafting and a security update",
