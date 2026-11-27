@@ -5,8 +5,8 @@ and track winning ideas through to execution.
 
 Three connected modules, built one at a time:
 
-1. **Innovation Sprint Planner** (in progress)
-2. AI Judge & Submission Copilot (planned)
+1. **Innovation Sprint Planner** (live, being extended)
+2. AI Judge & Submission Copilot (human judging live; AI coming)
 3. Innovation-to-Impact Tracker (planned)
 
 ## Stack
@@ -49,12 +49,17 @@ until you press **Save plan**.
 - The code checks the AI's answer: weights always add up to 100 and dates stay between today and
   the deadline. Anything unusable falls back to the template. See `src/lib/plan/ai-draft.ts`.
 
-## Milestones
+## Roadmap and documents
 
-- [x] **0. Foundation:** project runs, tests pass, production build works
-- [ ] 1. Auth and protected dashboard (Supabase)
-- [ ] 2. Create and list challenges
-- [ ] 3. Open, edit and delete challenges
-- [ ] 4. AI brief generation
-- [ ] 5. AI judging criteria and timeline
-- [ ] 6. Regenerate, hardening and polish
+- **In the app:** the **Roadmap** tab (`/roadmap`) shows every phase, what is done, what is next and
+  what is waiting on a paid service. Its content lives in `src/lib/roadmap.ts`: update an item's status
+  in the same commit that ships it, and add a changelog entry.
+- **In `docs/`:**
+  - `FEATURE_STATUS.md`: prototype audit, feature inventory, security findings, what to preserve
+  - `DEVELOPMENT_ROADMAP.md`: approach, phases, first tasks, decisions needing approval
+  - `TECHNICAL_ARCHITECTURE.md`: how the app fits together, and proposed changes
+  - `DATABASE_SCHEMA.md`: current tables and proposed additions
+  - `CHANGELOG.md`: what changed and when
+
+Rule for now: **free tools and free tiers only.** Anything that costs money stays on the roadmap as
+"Deferred" until it is worth paying for.
