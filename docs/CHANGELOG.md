@@ -2,6 +2,15 @@
 
 The in-app Roadmap tab shows the same entries (from `src/lib/roadmap.ts`).
 
+## 2026-11-28 — App navigation and dashboard overview (Phase 3)
+
+- New layout `src/app/dashboard/layout.tsx` adds the module menu (`src/components/app-nav.tsx`,
+  items in `src/lib/nav.ts`) to every dashboard page. "Soon" items link to their roadmap phase; a test
+  checks every live item points to a real page.
+- `/dashboard/workspace` opens your workspace's members and roles.
+- Dashboard overview: challenges, published vs drafts, ideas received, next deadline
+  (`src/lib/dashboard/overview.ts`, tested). Each challenge card shows its idea count.
+
 ## 2026-11-27 — Workspaces and roles (Phase 3, first part)
 
 - New database tables: `organizations`, `organization_members`, `organization_invites`
