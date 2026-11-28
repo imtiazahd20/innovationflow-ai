@@ -2,10 +2,12 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { APP_NAME } from "@/lib/config";
+import { buildOverview, daysLeftLabel, type Overview } from "@/lib/dashboard/overview";
 import { formatDate } from "@/lib/format";
 import { ROLE_LABELS, canManageChallenges, type Workspace } from "@/lib/orgs/roles";
 import { prepareWorkspaces } from "@/lib/orgs/server";
 import { createClient } from "@/lib/supabase/server";
+import { todayISO } from "@/lib/validation/challenge";
 
 export const metadata = { title: `Dashboard · ${APP_NAME}` };
 
@@ -65,6 +67,12 @@ async function DashboardContent({
     .select("id, title, deadline, status, organization_id")
     .order("created_at", { ascending: false });
   const challenges = rows ?? [];
+  // Which challenge each idea belongs to (again limited by the database rules), for the counts.
+  const { data: ideaRows, error: ideasError } = challenges.length
+    ? await supabase.from("ideas").select("challenge_id")
+    : { data: [], error: null };
+  if (ideasError) console.error("load idea counts failed", ideasError.code);
+  const overview = buildOverview(challenges, (ideaRows ?? []).map((r) => r.challenge_id), todayISO());
   // Challenges where someone invited me to judge (answered by a database function).
   const { data: judgeRows } = await supabase.rpc("my_judging_challenges");
   const judging = Array.isArray(judgeRows) ? (judgeRows as { id: string; title: string; deadline: string }[]) : [];
@@ -83,13 +91,9 @@ async function DashboardContent({
           </h1>
           <p className="mt-1 text-sm text-zinc-800">Signed in as {data.user.email}</p>
         </div>
-        <Link
-          href="/roadmap"
-          className="rounded-full border-2 border-flow-ink bg-white px-3 py-1 text-sm font-bold text-flow-ink transition-colors hover:bg-flow-ink hover:text-flow-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-ink"
-        >
-          See the roadmap →
-        </Link>
       </header>
+
+      {!loadFailed && challenges.length > 0 ? <OverviewStrip overview={overview} ideasKnown={!ideasError} /> : null}
 
       <WorkspaceList workspaces={workspaces} />
 
@@ -134,6 +138,11 @@ async function DashboardContent({
                     <h3 className="truncate text-base font-bold text-flow-ink">{challenge.title}</h3>
                     <p className="mt-1 text-sm text-zinc-800">
                       Deadline {formatDate(challenge.deadline)}
+                      {!ideasError
+                        ? ` · ${overview.ideasByChallenge.get(challenge.id) ?? 0} ${
+                            (overview.ideasByChallenge.get(challenge.id) ?? 0) === 1 ? "idea" : "ideas"
+                          }`
+                        : ""}
                       {managed.length > 1 && workspaceName.get(challenge.organization_id)
                         ? ` · ${workspaceName.get(challenge.organization_id)}`
                         : ""}
@@ -175,6 +184,47 @@ async function DashboardContent({
         </section>
       ) : null}
     </>
+  );
+}
+
+// Headline numbers for the challenges this person manages.
+function OverviewStrip({ overview, ideasKnown }: { overview: Overview; ideasKnown: boolean }) {
+  const next = overview.nextDeadline;
+  const stats: { label: string; value: string; note?: string }[] = [
+    { label: "Challenges", value: String(overview.total) },
+    { label: "Published", value: String(overview.published), note: `${overview.drafts} draft${overview.drafts === 1 ? "" : "s"}` },
+    ...(ideasKnown ? [{ label: "Ideas received", value: String(overview.ideas) }] : []),
+  ];
+  return (
+    <section aria-labelledby="overview-heading" className="flex flex-col gap-3">
+      <h2 id="overview-heading" className="text-sm font-black uppercase tracking-widest text-flow-ink">
+        Overview
+      </h2>
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {stats.map((s) => (
+          <div key={s.label} className="rounded-xl border-2 border-flow-ink bg-white p-4 shadow-[3px_3px_0_0_#0d0d0d]">
+            <dt className="text-xs font-black uppercase tracking-wide text-zinc-700">{s.label}</dt>
+            <dd className="mt-1 font-display text-3xl font-black text-flow-ink">{s.value}</dd>
+            {s.note ? <dd className="text-xs text-zinc-700">{s.note}</dd> : null}
+          </div>
+        ))}
+        <div className="col-span-2 rounded-xl border-2 border-flow-ink bg-flow-yellow p-4 shadow-[3px_3px_0_0_#0d0d0d] sm:col-span-1">
+          <dt className="text-xs font-black uppercase tracking-wide text-flow-ink">Next deadline</dt>
+          {next ? (
+            <>
+              <dd className="mt-1 text-base font-black text-flow-ink">{daysLeftLabel(next.daysLeft)}</dd>
+              <dd className="truncate text-xs text-flow-ink">
+                <Link href={`/dashboard/challenges/${next.id}`} className="underline">
+                  {next.title}
+                </Link>
+              </dd>
+            </>
+          ) : (
+            <dd className="mt-1 text-sm text-flow-ink">None coming up</dd>
+          )}
+        </div>
+      </dl>
+    </section>
   );
 }
 
