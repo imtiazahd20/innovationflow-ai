@@ -77,7 +77,7 @@ exports · notifications · activity/audit log · AI usage limits · plans and b
 
 | # | Finding | Risk | Recommendation |
 |---|---|---|---|
-| 1 | Attachment bucket is **public**; files are protected only by unguessable paths, forever | Medium: a forwarded link leaks a private file | Make the bucket private and serve short-lived signed links (free) |
+| 1 | Attachment bucket is **public**; files are protected only by unguessable paths, forever | Medium: a forwarded link leaks a private file | **Kept as is by the owner's decision (28 Nov 2026).** Revisit only if requirements change. |
 | 2 | Judge access matches the signed-in email | Low: safe because email confirmation is on (verified) | Keep confirmation on; move judges into organisation roles in Phase 3 |
 | 3 | Database changes applied by hand (Supabase shows "No migrations") | Medium: production and repo can drift | Track with the free Supabase CLI |
 | 4 | No lockfile in git | Low: builds can pick up new library versions unexpectedly | Commit `package-lock.json` (decision for the owner) |

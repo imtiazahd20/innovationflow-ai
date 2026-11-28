@@ -31,6 +31,8 @@ erDiagram
 | `ideas` | Submissions (name, email, title, description, private `thread_token`) | Admins and organisers read/delete; visitors insert only via `submit_idea()` |
 | `challenge_judges` | Judges invited to one challenge by email | Admins and organisers |
 | `idea_scores` | One score 0–10 per idea × criterion × judge | Only through `get_judging()` / `save_scores()` |
+| `activity_logs` | What happened in a workspace, written only by triggers | Admins and organisers read |
+| `notifications` | Per-person messages (new idea, new member), written only by triggers | Each person reads, marks read, deletes their own |
 | `idea_comments` | Discussion messages with up to 3 attachments | Only through `get_discussion()` / `post_comment()` |
 
 Key functions: `has_org_role`, `is_org_member`, `can_manage_challenge`, `ensure_workspace`,
@@ -46,7 +48,7 @@ These reuse and extend the tables above; nothing is renamed or removed.
 |---|---|---|
 | 3 | ✅ `organizations`, `organization_members`, `organization_invites`; `challenges.organization_id` | Applied 27 Nov 2026 |
 | 3 | `platform_admins` | For the platform super-admin role |
-| 3 | `notifications`, `activity_logs` | In-app only |
+| 3 | ✅ `notifications`, `activity_logs` | Applied 28 Nov 2026 |
 | 4 | `innovation_programs`; `challenges.program_id`, `format`, `event_*` fields, wider `status` | Hackathon = challenge with a format |
 | 4 | `registrations`, `participant_profiles`, `teams`, `team_members`, `mentor_assignments`, `mentoring_sessions` | |
 | 5 | `ideas` gains `team_id`, `solution`, `category`, `links`, `status`, `updated_at`; `idea_files` | Submissions stay in `ideas` |

@@ -2,6 +2,17 @@
 
 The in-app Roadmap tab shows the same entries (from `src/lib/roadmap.ts`).
 
+## 2026-11-28 — Activity log and notifications (Phase 3)
+
+- Migration `20261128000000_activity_notifications.sql` (rollback in `supabase/rollback/`): tables
+  `activity_logs` and `notifications`, written only by database triggers on challenges, ideas,
+  members and invitations. Admins and organisers read the activity; each person reads and marks
+  their own notifications.
+- Header bell with unread count; `/dashboard/notifications` (open marks read, mark all read, clear
+  read); "Recent activity" on the workspace page. Stored links are only followed inside the app.
+- Test `supabase/tests/activity_check.sql` (23 checks).
+- Decision: attachments stay public-by-link (owner's choice); removed from the roadmap.
+
 ## 2026-11-28 — App navigation and dashboard overview (Phase 3)
 
 - New layout `src/app/dashboard/layout.tsx` adds the module menu (`src/components/app-nav.tsx`,
