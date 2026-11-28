@@ -18,6 +18,7 @@ export const APP_NAV: NavGroup[] = [
     items: [
       { label: "Dashboard", href: "/dashboard", match: ["/dashboard", "/dashboard/challenges"] },
       { label: "Members & roles", href: "/dashboard/workspace", match: ["/dashboard/workspace", "/dashboard/organizations"] },
+      { label: "Notifications", href: "/dashboard/notifications" },
     ],
   },
   {

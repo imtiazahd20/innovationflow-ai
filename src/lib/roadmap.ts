@@ -86,10 +86,19 @@ export const ROADMAP: RoadmapPhase[] = [
         detail: "Overview of challenges, ideas and the next deadline is live; judging progress comes with analytics.",
         status: "in-progress",
       },
-      { id: "core-notifications", title: "In-app notifications", status: "planned" },
-      { id: "core-activity", title: "Activity log for important actions", status: "planned" },
-      { id: "core-private-files", title: "Private file storage with expiring links", status: "next" },
-      { id: "core-migrations", title: "Database changes tracked with the free Supabase CLI", status: "planned" },
+      {
+        id: "core-notifications",
+        title: "In-app notifications",
+        detail: "New ideas notify admins and organisers; new members notify admins. Bell with unread count in the header.",
+        status: "done",
+      },
+      {
+        id: "core-activity",
+        title: "Activity log for important actions",
+        detail: "Recorded by the database; admins and organisers see it on the workspace page.",
+        status: "done",
+      },
+      { id: "core-migrations", title: "Database changes tracked with the free Supabase CLI", status: "next" },
       { id: "core-google-login", title: "Sign in with Google or Microsoft", status: "planned" },
     ],
   },
@@ -243,6 +252,15 @@ export const ROADMAP: RoadmapPhase[] = [
 
 // Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    date: "2026-11-28",
+    title: "Activity log and notifications",
+    changes: [
+      "A bell in the header shows unread notifications; the Notifications page lists them, with mark-all-read.",
+      "Admins and organisers are told when a new idea arrives; admins when someone joins the workspace.",
+      "The workspace page shows recent activity: challenges, ideas, invitations and role changes.",
+    ],
+  },
   {
     date: "2026-11-28",
     title: "App navigation and dashboard overview",
