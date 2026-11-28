@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { isChallengeId } from "@/lib/challenges/ids";
 import { APP_NAME } from "@/lib/config";
-import { ORG_ROLES, ROLE_HINTS, ROLE_LABELS, groupMembers, isAdmin, isOrgRole, type Membership, type OrgRole } from "@/lib/orgs/roles";
+import { ORG_ROLES, ROLE_HINTS, ROLE_LABELS, canManageChallenges, groupMembers, isAdmin, isOrgRole, type Membership, type OrgRole } from "@/lib/orgs/roles";
 import { createClient } from "@/lib/supabase/server";
+import { safeAppLink, timeAgo } from "@/lib/time";
 import { cancelInvite, inviteMember, removeMemberRole, renameOrganization } from "./actions";
 import { InviteForm, MemberList, PendingInvites, RenameForm } from "./org-panels";
 
@@ -58,6 +59,20 @@ async function OrganizationContent({ params }: { params: Promise<{ id: string }>
     invites = (inviteRows ?? []).filter((r): r is { id: string; email: string; role: OrgRole } => isOrgRole(r.role));
   }
 
+  // Admins and organisers see the workspace's history (the database enforces this too).
+  const canSeeActivity = canManageChallenges(myRoles);
+  let activity: { id: number; actor_label: string; summary: string; link: string | null; created_at: string }[] = [];
+  if (canSeeActivity) {
+    const { data: activityRows, error: activityError } = await supabase
+      .from("activity_logs")
+      .select("id, actor_label, summary, link, created_at")
+      .eq("organization_id", id)
+      .order("created_at", { ascending: false })
+      .limit(25);
+    if (activityError) console.error("load activity failed", activityError.code);
+    activity = activityRows ?? [];
+  }
+
   return (
     <>
       <header className="flex flex-col gap-2">
@@ -86,6 +101,36 @@ async function OrganizationContent({ params }: { params: Promise<{ id: string }>
           Only admins can invite people or change roles.
         </p>
       )}
+
+      {canSeeActivity ? (
+        <section aria-labelledby="activity-heading" className="flex flex-col gap-4 rounded-2xl border-4 border-flow-ink bg-white p-5 shadow-[4px_4px_0_0_#0d0d0d]">
+          <h2 id="activity-heading" className="font-display text-xl font-black uppercase text-flow-ink">Recent activity</h2>
+          {activity.length === 0 ? (
+            <p className="text-sm text-zinc-800">
+              Nothing recorded yet. New challenges, ideas, invitations and role changes will appear here.
+            </p>
+          ) : (
+            <ol className="flex flex-col divide-y-2 divide-flow-ink/10">
+              {activity.map((a) => {
+                const href = safeAppLink(a.link);
+                return (
+                  <li key={a.id} className="flex flex-col gap-0.5 py-2.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                    <p className="min-w-0 text-sm text-flow-ink">
+                      <span className="font-semibold">{a.actor_label}</span>{" "}
+                      {href ? (
+                        <Link href={href} className="hover:underline">{a.summary}</Link>
+                      ) : (
+                        a.summary
+                      )}
+                    </p>
+                    <time dateTime={a.created_at} className="shrink-0 text-xs text-zinc-700">{timeAgo(a.created_at)}</time>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </section>
+      ) : null}
 
       <section aria-labelledby="roles-heading" className="flex flex-col gap-3">
         <h2 id="roles-heading" className="font-display text-lg font-black uppercase text-flow-ink">What each role can do</h2>
