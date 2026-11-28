@@ -79,11 +79,16 @@ export const ROADMAP: RoadmapPhase[] = [
         status: "done",
       },
       { id: "core-invites", title: "Invite colleagues to an organisation", status: "done" },
-      { id: "core-nav", title: "App navigation for the three modules", status: "next" },
-      { id: "core-org-dashboard", title: "Organisation dashboard", status: "planned" },
+      { id: "core-nav", title: "App navigation for the three modules", status: "done" },
+      {
+        id: "core-org-dashboard",
+        title: "Organisation dashboard",
+        detail: "Overview of challenges, ideas and the next deadline is live; judging progress comes with analytics.",
+        status: "in-progress",
+      },
       { id: "core-notifications", title: "In-app notifications", status: "planned" },
       { id: "core-activity", title: "Activity log for important actions", status: "planned" },
-      { id: "core-private-files", title: "Private file storage with expiring links", status: "planned" },
+      { id: "core-private-files", title: "Private file storage with expiring links", status: "next" },
       { id: "core-migrations", title: "Database changes tracked with the free Supabase CLI", status: "planned" },
       { id: "core-google-login", title: "Sign in with Google or Microsoft", status: "planned" },
     ],
@@ -238,6 +243,15 @@ export const ROADMAP: RoadmapPhase[] = [
 
 // Newest first.
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    date: "2026-11-28",
+    title: "App navigation and dashboard overview",
+    changes: [
+      "A menu on every dashboard page: Dashboard, Members & roles, the three modules and the Roadmap.",
+      "Modules that aren't built yet are marked \"Soon\" and open their place on the roadmap.",
+      "The dashboard shows your challenges, how many are published, ideas received and the next deadline.",
+    ],
+  },
   {
     date: "2026-11-27",
     title: "Workspaces and roles",
