@@ -12,19 +12,38 @@ const pill =
 async function AccountControl() {
   const supabase = await createClient();
   const { data } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
-  if (!data.user) {
+  if (!supabase || !data.user) {
     return (
       <Link href="/login" className={`${pill} bg-white`}>
         Sign in
       </Link>
     );
   }
+  // Unread notifications: the database only counts this person's own.
+  const { count } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .is("read_at", null);
+  const unread = count ?? 0;
   return (
-    <form action={signOut}>
-      <button type="submit" className={`${pill} bg-white`}>
-        Sign out
-      </button>
-    </form>
+    <div className="flex items-center gap-1.5 sm:gap-2">
+      <Link
+        href="/dashboard/notifications"
+        aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
+        className={`${pill} relative flex items-center gap-1 ${unread > 0 ? "bg-flow-red text-white hover:bg-flow-ink" : "bg-white"}`}
+      >
+        <svg aria-hidden viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+        </svg>
+        {unread > 0 ? <span>{unread > 99 ? "99+" : unread}</span> : null}
+      </Link>
+      <form action={signOut}>
+        <button type="submit" className={`${pill} bg-white`}>
+          Sign out
+        </button>
+      </form>
+    </div>
   );
 }
 
