@@ -211,7 +211,7 @@ export default function Home() {
       </section>
 
       <footer className="border-t-4 border-flow-ink bg-flow-ink px-4 py-6 text-center text-sm text-zinc-300">
-        {APP_NAME} · built for the Inument Hackathon ·{" "}
+        {APP_NAME} · built by imtiaz.ahd20@gmail.com ·{" "}
         <Link href="/" className="font-bold text-flow-yellow underline">
           Home
         </Link>
